@@ -245,6 +245,11 @@ options;
 ft5 = fittype('(exp(-2*di)*cos(2*dr)-1)*sin(2*k*x)/(2*pi*sqrt(k*x))+(exp(-2*di)*sin(2*dr))*cos(2*k*x)/(2*pi*sqrt(k*x))', 'independent', 'x', 'problem', 'k');
 %ft6 = fittype('(exp(-2*di)*cos(2*dr)-1)*sin(2*k*x)/(2*pi*(k*x)^0.1)+(exp(-2*di)*sin(2*dr))*cos(2*k*x)/(2*pi*(k*x)^0.1)', 'independent', 'x', 'problem', 'k');
 %
+ft_sim = fittype('A*sin(k*x+phi)/sqrt(k*x)', 'problem', 'k', 'independent', 'x');
+
+ft3a = fittype( 'a*exp(-p1)*sin(2*k*x) + b*exp(-p1)*cos(2*k*x)', 'independent', 'x','problem', 'k');
+
+
 ind_fit_start = zeros(9,1);
 A = zeros(9,1);
 B = zeros(9,1);
@@ -259,7 +264,7 @@ deltaI_5 = zeros(9,1);
 deltaR_5 = zeros(9,1);
 deltaI_5_1 = zeros(9,1);
 deltaR_5_1 = zeros(9,1);
-
+simtest = zeros(9,2);
 
 for i = 1:nE
     x_from_wall = (0:(size(linecut_wall,2)-1))*160/1024;
@@ -291,12 +296,18 @@ for i = 1:nE
     [f_method5, g_method5] = fit(x_from_wall(ind_fit_start(i):end)',linecut_wall_fit_final{i}', ft5, 'problem', k_method3(i), 'StartPoint', [0, 0], 'Lower', [0.001, -Inf]);
     [f_method5_1, g_method5_1] = fit(x_from_wall(ind_fit_start(i):end)',linecut_wall_fit_final{i}', ft5, 'problem', k_method3(i), 'StartPoint', [0, 0]);
     
+    [f_simtest1, g_simtest1] = fit(x_from_wall(ind_fit_start(i):end)',linecut_wall_fit_final{i}', ft_sim, 'problem', k_method3(i), 'StartPoint', [0, 0], 'Lower', [0.001, -Inf]);
+    [f_simtest2, g_simtest2] = fit(x_from_wall(ind_fit_start(i):end)',linecut_wall_fit_final{i}', ft3a, 'problem', k_method3(i), 'StartPoint', [0, 0,0], 'Lower', lower_bounds, 'Upper', upper_bounds);
     
+    simtest(i,1) = f_simtest1.A;
+    simtest(i,2) = f_simtest1.phi;
     
     hold on
-    %plot(f_method3)
+    plot(f_method3,'g')
+    plot(f_simtest1, 'm')
     %plot(f_method4,'k')
-    plot(f_method5)
+    plot(f_simtest2, 'r')
+    %plot(f_method5)
     plot(f_method5_1,'k')
     ylim([-0.1, 0.1])
     A(i) = f_method3.a;
@@ -372,17 +383,20 @@ for i = 1:9
     figure;
     scatter(x_from_wall(ind_fit_start(i):end), linecut_wall_fit_final{i})
     hold on
-    plot(linspace(0,140,nspec), disp_fit_5_1-1)
+    plot(linspace(0,140,nspec), disp_fit_3-1)
     
     
     
 end
 
 %% Creating a model to predict deltaI and deltaR based on amplitude and phase
-
+close all
 dispersion1 = [0.439, 0.4068, -10.996];
 
 ft_sim = fittype('A*sin(k*x+phi)', 'problem', 'k', 'independent', 'x');
+%ft3a = fittype( 'a*exp(-p1)*sin(2*k*x)/sqrt(k*x) + b*exp(-p1)*cos(2*k*x)/sqrt(k*x)', 'independent', 'x','problem', 'k');
+ft3a = fittype( 'a*exp(-p1)*sin(2*k*x) + b*exp(-p1)*cos(2*k*x)', 'independent', 'x','problem', 'k');
+
 
 abc = kconstants; 
 a0 = abc.a;
@@ -395,7 +409,7 @@ specPoints = [zeros(1,nspec); linspace(-60,80,nspec)]';
 
 E = -0.4:0.1:0.4;
 
-training_size = 1000;
+training_size = 3;
 training1 = cell(training_size,2);
 
 rng('default'); 
@@ -419,11 +433,11 @@ for i = 1:training_size
     delta = deltaR+sqrt(-1)*deltaI;
     
     training1{i,1} = [deltaI, deltaR];
-    training1{i,2} = kspec(vpCOwall, specPoints, E, delta, dispersion1);
+    training1{i,2} = kspec(vpCOwall, specPoints, E, delta, dispersion1)-1;
     for j = 1:9
         
         [fit_sim, good_sim] = fit(x_sim', training1{i,2}(j,:)', ft_sim, 'problem', k_sim(j),'StartPoint', [0,0]);
-        
+        [fit_sim_3, good_sim_3] = fit(x_sim', training1{i,2}(j,:)', ft3a, 'problem', k_sim(j),'StartPoint', [0,0,0],  'Lower', lower_bounds, 'Upper', upper_bounds);
         [pks, locs, w, p] = findpeaks( training1{i,2}(j,:));
         
         
@@ -445,7 +459,11 @@ for i = 1:training_size
         
         training2(((i-1)*9+j),:) = [fit_sim.A fit_sim.phi deltaI deltaR E(j) k_sim(j) peaks_temp locs_temp width_temp prom_temp];
         
-        
+        figure; scatter(x_sim', training1{i,2}(j,:))
+        hold on
+        plot(fit_sim_3,'g')
+        plot(fit_sim, 'm')
+
         
     end
     
