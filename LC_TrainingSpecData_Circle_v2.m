@@ -17,7 +17,7 @@ y = radius * sin(theta) + yCenter;
 vpCO = [x',y'];
 
 kfit2Cu(vpCO)
-
+%%
 %
 %figure; scatter(vpCO(:,1), vpCO(:,2))
 
