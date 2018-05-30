@@ -539,7 +539,6 @@ eps = 0.00001;
 ft3a = fittype( 'a*sin(2*k*x)/sqrt(k*x+eps) + b*cos(2*k*x)/sqrt(k*x+eps)', 'independent', 'x','problem', 'k');
 
 % Useless values of delta, just so that table looks the same as simulation.
-% 
 deltaI = 0.1;
 deltaR = -0.1;
 
