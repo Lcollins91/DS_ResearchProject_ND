@@ -33,19 +33,40 @@ spec1 = spec1./dataCu;
 spec3 = spec3./dataCu;
 
 bias = a.Data(:,1);
+nv = 201;
+bias3 = linspace(-0.4, 0.5, nv);
 expSpec = 0.5*(spec1 + spec3);
 
-close all
-figure;
-plot(bias, spec3+1)
-hold on
-plot(bias, spec1)
- 
-figure;
-findpeaks(spec1, 'MinPeakProminence', mpp)
+%First need spec points above E = -0.4 only
+bias_exp2 = bias(bias>=-0.4);
+expSpec2 = expSpec(bias>= -0.4);
 
-figure;
-findpeaks(spec3, 'MinPeakProminence', mpp)
+%Now need to downsample
+expSpec3 = interp1(bias_exp2, expSpec2, bias3);
+
+
+
+close all
+% figure;
+% plot(bias, spec3+1)
+% hold on
+% plot(bias, spec1)
+%  
+% figure;
+% findpeaks(spec1, 'MinPeakProminence', mpp)
+% 
+% figure;
+% findpeaks(spec3, 'MinPeakProminence', mpp)
+
+%Checking that the original and downsampled specs look the same
+figure; 
+plot(bias_exp2, expSpec2);
+hold on
+plot(bias3, expSpec3);
+
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonExperimentalData053118_specPoints.csv', expSpec3);
+
+
 
 %% Want to compare the experimental specs to simulated
 % First peaks are a bit small, and there may be additional peaks in the
@@ -59,6 +80,9 @@ mpp = 0.1;
 bias_limit = -0.4;
 
 x = linspace(-90,90,256);
+
+
+topofile = ksxm('Topo021.sxm');
 
 figure;
 plot(x,topofile.Zf(:,128)*10^9)
@@ -94,7 +118,7 @@ hex_exp2 = hex_exp*R;
 scatter(hex_exp2(:,1), hex_exp2(:,2))
 
 % Want to check that we use the same size hexagon as we built
-topofile = ksxm('Topo021.sxm');
+
 figure;
 imagesc(x,x,topofile.Zf)
 axis image 
@@ -180,6 +204,25 @@ csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonBias.csv', bi
 
 
 
+
+%% Comparing Simulation with Predicted Phase to Experimental 
+
+pred_phase = -0.03 + sqrt(-1)*0.175; 
+Emory_pred_phase = -0.15 + sqrt(-1)*0.05;
+
+sim_pred_spec = kspec(vpCO, vspec, bias3, pred_phase, dispersion1);
+sim_pred_spec1 = kspec(vpCO, vspec, bias3, Emory_pred_phase, dispersion1);
+
+figure; 
+plot(bias3, expSpec3);
+
+hold on
+plot(bias3, sim_pred_spec1, '.r');
+
+plot(bias3, sim_pred_spec);
+
+diff1 = sum((expSpec3-sim_pred_spec1').^2);
+diff2 = sum((expSpec3 - sim_pred_spec').^2);
 
 
 
