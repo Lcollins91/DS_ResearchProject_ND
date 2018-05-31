@@ -39,10 +39,12 @@ expSpec = 0.5*(spec1 + spec3);
 
 %First need spec points above E = -0.4 only
 bias_exp2 = bias(bias>=-0.4);
+bias_exp3 = linspace(-0.25, 0.25, nv);
 expSpec2 = expSpec(bias>= -0.4);
 
 %Now need to downsample
 expSpec3 = interp1(bias_exp2, expSpec2, bias3);
+expSpec4 = interp1(bias_exp2, expSpec2, bias_exp3);
 
 
 
@@ -62,8 +64,9 @@ close all
 figure; 
 plot(bias_exp2, expSpec2);
 hold on
-plot(bias3, expSpec3);
+plot(bias_exp3, expSpec4);
 
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonExperimentalData053118_v2.csv', expSpec4);
 csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonExperimentalData053118_specPoints.csv', expSpec3);
 
 
@@ -174,6 +177,7 @@ vars(2,1,:) = (vars(2,1,:)-1)*pi/2;
 
 nv = 201;
 bias3 = linspace(-0.4, 0.5, nv);
+bias4 = linspace(-0.25, 0.25, nv);
 vspec = [0,0];
 
 trainingA = zeros(training_size, (2+nv));
@@ -186,7 +190,7 @@ for i = 1:training_size
     delta = deltaR+sqrt(-1)*deltaI;
     
     training1{i,1} = [deltaI, deltaR];
-    training1{i,2} = kspec(vpCO, vspec, bias3, delta, dispersion1);
+    training1{i,2} = kspec(vpCO, vspec, bias4, delta, dispersion1);
 
     trainingA(i,:) = [deltaI deltaR training1{i,2}'];
 
@@ -198,9 +202,9 @@ end
 
 %% Saving the training data
 
-save('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonTrainingData052818_specPoints.mat', 'trainingA');
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonTrainingData052818_specPoints.csv', trainingA);
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonBias.csv', bias3);
+save('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonTrainingData053118_v2.mat', 'trainingA');
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonTrainingData053118_v2.csv', trainingA);
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonBias_v2.csv', bias4);
 
 
 
@@ -209,20 +213,24 @@ csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonBias.csv', bi
 
 pred_phase = -0.03 + sqrt(-1)*0.175; 
 Emory_pred_phase = -0.15 + sqrt(-1)*0.05;
+pred_phase_2 = 0.395*sqrt(-1) -0.104;
 
-sim_pred_spec = kspec(vpCO, vspec, bias3, pred_phase, dispersion1);
-sim_pred_spec1 = kspec(vpCO, vspec, bias3, Emory_pred_phase, dispersion1);
+sim_pred_spec = kspec(vpCO, vspec, bias3, pred_phase);
+sim_pred_spec1 = kspec(vpCO, vspec, bias3, Emory_pred_phase);
+sim_pred_spec2 = kspec(vpCO, vspec, bias_exp3, pred_phase_2);
 
 figure; 
-plot(bias3, expSpec3);
+plot(bias3, expSpec3, 'b','LineWidth', 2);
 
 hold on
-plot(bias3, sim_pred_spec1, '.r');
+plot(bias3, sim_pred_spec1, '.m', 'LineWidth', 2);
 
-plot(bias3, sim_pred_spec);
+plot(bias3, sim_pred_spec,'r', 'LineWidth', 2);
+plot(bias_exp3, sim_pred_spec2, 'y', 'LineWidth', 2)
 
-diff1 = sum((expSpec3-sim_pred_spec1').^2);
-diff2 = sum((expSpec3 - sim_pred_spec').^2);
+diff1 = sum((expSpec3-sim_pred_spec1').^2)
+diff2 = sum((expSpec3 - sim_pred_spec').^2)
+diff3 = sum((expSpec4 - sim_pred_spec2').^2)
 
 
 
