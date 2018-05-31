@@ -33,19 +33,40 @@ spec1 = spec1./dataCu;
 spec3 = spec3./dataCu;
 
 bias = a.Data(:,1);
+nv = 201;
+bias3 = linspace(-0.4, 0.5, nv);
 expSpec = 0.5*(spec1 + spec3);
 
-close all
-figure;
-plot(bias, spec3+1)
-hold on
-plot(bias, spec1)
- 
-figure;
-findpeaks(spec1, 'MinPeakProminence', mpp)
+%First need spec points above E = -0.4 only
+bias_exp2 = bias(bias>=-0.4);
+expSpec2 = expSpec(bias>= -0.4);
 
-figure;
-findpeaks(spec3, 'MinPeakProminence', mpp)
+%Now need to downsample
+expSpec3 = interp1(bias_exp2, expSpec2, bias3);
+
+
+
+close all
+% figure;
+% plot(bias, spec3+1)
+% hold on
+% plot(bias, spec1)
+%  
+% figure;
+% findpeaks(spec1, 'MinPeakProminence', mpp)
+% 
+% figure;
+% findpeaks(spec3, 'MinPeakProminence', mpp)
+
+%Checking that the original and downsampled specs look the same
+figure; 
+plot(bias_exp2, expSpec2);
+hold on
+plot(bias3, expSpec3);
+
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonExperimentalData053118_specPoints.csv', expSpec3);
+
+
 
 %% Want to compare the experimental specs to simulated
 % First peaks are a bit small, and there may be additional peaks in the
