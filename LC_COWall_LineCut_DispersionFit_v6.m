@@ -297,7 +297,8 @@ for i = 1:nE
     [f_method5_1, g_method5_1] = fit(x_from_wall(ind_fit_start(i):end)',linecut_wall_fit_final{i}', ft5, 'problem', k_method3(i), 'StartPoint', [0, 0]);
     
     [f_simtest1, g_simtest1] = fit(x_from_wall(ind_fit_start(i):end)',linecut_wall_fit_final{i}', ft_sim, 'problem', k_method3(i), 'StartPoint', [0, 0], 'Lower', [0.001, -Inf]);
-    [f_simtest2, g_simtest2] = fit(x_from_wall(ind_fit_start(i):end)',linecut_wall_fit_final{i}', ft3a, 'problem', k_method3(i), 'StartPoint', [0, 0,0], 'Lower', lower_bounds, 'Upper', upper_bounds);
+    [f_simtest2, g_simtest2] = fit(x_from_wall(ind_fit_start(i):end)',linecut_wall_fit_final{i}', ft3a, 'problem', k_method3(i), ...
+        'StartPoint', [0, 0,0], 'Lower', lower_bounds, 'Upper', upper_bounds);
     
     simtest(i,1) = f_simtest1.A;
     simtest(i,2) = f_simtest1.phi;
@@ -491,7 +492,15 @@ fitlm([training3.A, training3.phi], training3.deltaR)
 
 [beta, sigma] = mvregress([training3.A, training3.phi], [training3.deltaI, training3.deltaR])
 
-%% Data Analysis and Fit
+
+
+
+%% 
+%%%%%%%% EXTRACTING THE FEATURES FROM THE DATA AND PLOTS ANALYSIS OF RESULTS %%%%%%%% 
+%
+%% Fit of dataset
+
+% changing to data folder
 cd('/Users/ken/Documents/Notre Dame/Research/Projects/Scattering Optimization/Linecut from Wall/Data')
 
 % loading the data
@@ -517,28 +526,28 @@ kcm('gold');
 topocut=flipud(mean(topo,2));
 speccutall=flipud(squeeze(mean(specs,2)));
 
-% Finding center of CO wall
+% Finding center of CO wall and cropping the data
 [~,origin]=min(topocut);
 speccut=speccutall(origin:end,:);
 
-dx=160/256;
+% defined the x axis perpendicular to the wall starting at wall.
+dx=160/255;
 nx=length(speccut);
 x=(0:dx:(nx-1)*dx)';
 
 % Vector with eye-fit of momentum vector (in nm^-1)
 %k = [1.24; 1.61; 1.93; 2.23; 2.51; 2.76; 2.97; 3.22];
 
-%%
-% E vs k dispersion parameters:
+% E vs k dispersion parameters from Laura's fit:
 dispersion1 = [0.439, 0.4068, -10.996];
 E = -0.4:0.1:0.4;
 k = kv2k(E,dispersion1);
 
 % fitting model
-eps = 0.00001;
+eps = 0.000001;
 ft3a = fittype( 'a*sin(2*k*x)/sqrt(k*x+eps) + b*cos(2*k*x)/sqrt(k*x+eps)', 'independent', 'x','problem', 'k');
 
-% Useless values of delta, just so that table looks the same as simulation.
+% Useless values of delta, just so that table for Python looks the same as simulation.
 deltaI = 0.1;
 deltaR = -0.1;
 
@@ -546,15 +555,12 @@ deltaR = -0.1;
 nkeep = 5;
 fit_parameters=zeros(length(E),(6+4*nkeep));
 
-for j = 1:length(E)
-    
+for j = 1:length(E)    
     %       [fit_sim, good_sim] = fit(x, speccut(:,j), ft_sim, 'problem', k_sim(j),'StartPoint', [0,0]);
     [fit_sim_3, good_sim_3] = fit(x(30:end), speccut(30:end,j), ft3a, 'problem', k(j),'StartPoint', [-0.2,-0.2],  'Lower', [-0.5, -0.5], 'Upper', [0.5, 0.5]);
     [pks, locs, w, p] = findpeaks(speccut(:,j),'MinPeakDistance',10);
     
-    
     if length(pks) >= nkeep
-        
         peaks_temp = pks(1:nkeep);
         locs_temp = locs(1:nkeep);
         width_temp = w(1:nkeep);
@@ -563,17 +569,14 @@ for j = 1:length(E)
         peaks_temp = [pks zeros(1,nkeep-length(pks))];
         locs_temp = [locs zeros(1,nkeep-length(pks))];
         width_temp = [w zeros(1,nkeep-length(pks))];
-        prom_temp = [p zeros(1,nkeep-length(pks))];
-        
+        prom_temp = [p zeros(1,nkeep-length(pks))];     
     end
     
     fit_parameters(j,:) = [fit_sim_3.a fit_sim_3.b deltaI deltaR E(j) k(j) peaks_temp' locs_temp' width_temp' prom_temp'];
     
 end
-csvwrite('/Users/ken/Desktop/LineCutExpData180530.csv', fit_parameters);
 
-%%
-% Ploting each linecut 
+% Ploting each linecut with fit
 figure;
 for i=1:9 
     subplot(3,3,i);
@@ -582,4 +585,35 @@ for i=1:9
     title(['E= ' num2str(-.4+i*.1) ' V'])
 end
 
+%% Exporting fit data for python
+
+csvwrite('/Users/ken/Desktop/LineCutExpData180530.csv', fit_parameters);
+
+
+%% Plotting the prediction for the phase from Python ML regresssion
+
+% Creating spec from Scattering Theory using predicted phase. 
+a0=2.54; n = 30;
+vpCOwall = [zeros(n+1,1), (-n/2*2*a0:2*a0:n/2*2*a0)'];
+
+%delta1 = -0.03055+0.1755*sqrt(-1); % Laura's Phase
+delta1 = -0.1+0.1*sqrt(-1); % Old Phase
+delta2= -0.15+0.05*sqrt(-1); % Emory's Phase
+
+nspec = length(x);
+specPoints = [x, zeros(nspec,1)];
+
+spec1 = kspec(vpCOwall, specPoints, E, delta1, dispersion1)-1;
+spec2 = kspec(vpCOwall, specPoints, E, delta2, dispersion1)-1;
+
+% Plotting the result
+figure
+for i=1:9 
+    subplot(3,3,i);
+%     plot(x,speccut(:,i),x,fit_parameters(i,1)*sin(2*k(i)*x)./sqrt(k(i)*x+eps) + fit_parameters(i,2)*cos(2*k(i)*x)./sqrt(k(i)*x+eps),...
+%         x,spec1(i,:),x,spec2(i,:)); legend('Data','Fit','Laura','Emory');
+    plot(x,speccut(:,i),x,spec1(i,:),x,spec2(i,:)); legend('Data','Laura','Emory');
+    ylim([-.2,.2]);
+    title(['E= ' E(i) ' V'])
+end
 
