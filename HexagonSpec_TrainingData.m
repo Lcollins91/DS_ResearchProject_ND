@@ -165,6 +165,7 @@ findpeaks(test2, bias3, 'MinPeakProminence', 0.04, 'NPeaks', 7);
 %% Generating specs for a range of deltas
 
 training_size = 3000;
+training_size = 2;
 training1 = cell(training_size,2);
 
 rng('default'); 
@@ -210,6 +211,12 @@ csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonBias_v2.csv',
 
 
 %% Comparing Simulation with Predicted Phase to Experimental 
+close all 
+
+new_a = 2.42;
+vpCO_v2 = hexagon_v2(new_a);
+vpCO_v3 = hexagon_v2(2.3);
+
 
 pred_phase = -0.03 + sqrt(-1)*0.175; 
 Emory_pred_phase = -0.15 + sqrt(-1)*0.05;
@@ -219,7 +226,17 @@ sim_pred_spec = kspec(vpCO, vspec, bias3, pred_phase);
 sim_pred_spec1 = kspec(vpCO, vspec, bias3, Emory_pred_phase);
 sim_pred_spec2 = kspec(vpCO, vspec, bias_exp3, pred_phase_2);
 
+sim_pred_spec_newA = kspec(vpCO_v2, vspec, bias3, pred_phase);
+sim_pred_spec1_newA = kspec(vpCO_v2, vspec, bias3, Emory_pred_phase);
+sim_pred_spec2_newA = kspec(vpCO_v2, vspec, bias_exp3, pred_phase_2); 
+
+sim_pred_spec_newA_v3 = kspec(vpCO_v3, vspec, bias3, pred_phase);
+sim_pred_spec1_newA_v3 = kspec(vpCO_v3, vspec, bias3, Emory_pred_phase);
+sim_pred_spec2_newA_v3 = kspec(vpCO_v3, vspec, bias_exp3, pred_phase_2); 
+
+
 figure; 
+subplot(1,2,1)
 plot(bias3, expSpec3, 'b','LineWidth', 2);
 
 hold on
@@ -228,9 +245,69 @@ plot(bias3, sim_pred_spec1, '.m', 'LineWidth', 2);
 plot(bias3, sim_pred_spec,'r', 'LineWidth', 2);
 plot(bias_exp3, sim_pred_spec2, 'y', 'LineWidth', 2)
 
+subplot(1,2,2)
+plot(bias3, expSpec3, 'b','LineWidth', 2);
+
+hold on
+plot(bias3, sim_pred_spec1_newA, '.m', 'LineWidth', 2);
+
+plot(bias3, sim_pred_spec_newA,'r', 'LineWidth', 2);
+plot(bias_exp3, sim_pred_spec2_newA, 'y', 'LineWidth', 2)
+
 diff1 = sum((expSpec3-sim_pred_spec1').^2)
 diff2 = sum((expSpec3 - sim_pred_spec').^2)
 diff3 = sum((expSpec4 - sim_pred_spec2').^2)
+
+
+figure; 
+subplot(2,3,1)
+plot(bias3, expSpec3, 'b','LineWidth', 2);
+hold on
+plot(bias3, sim_pred_spec1, '.r', 'LineWidth', 2);
+legend('Experimental', 'Emory phase, a = 2.54')
+
+subplot(2,3,2)
+plot(bias3, expSpec3, 'b','LineWidth', 2);
+hold on
+plot(bias3, sim_pred_spec1_newA, '.r', 'LineWidth', 2);
+legend('Experimental', 'Emory phase, a = 2.42')
+
+subplot(2,3,3)
+plot(bias3, expSpec3, 'b','LineWidth', 2);
+hold on
+plot(bias3, sim_pred_spec1_newA_v3, '.r', 'LineWidth', 2);
+legend('Experimental', 'Emory phase, a = 2.3')
+
+subplot(2,3,4)
+plot(bias3, expSpec3, 'b','LineWidth', 2);
+hold on
+plot(bias3, sim_pred_spec, '.r', 'LineWidth', 2);
+legend('Experimental', 'Laura phase, a = 2.54')
+
+subplot(2,3,5)
+plot(bias3, expSpec3, 'b','LineWidth', 2);
+hold on
+plot(bias3, sim_pred_spec_newA, '.r', 'LineWidth', 2);
+legend('Experimental', 'Laura phase, a = 2.42')
+
+subplot(2,3,6)
+plot(bias3, expSpec3, 'b','LineWidth', 2);
+hold on
+plot(bias3, sim_pred_spec_newA_v3, '.r', 'LineWidth', 2);
+legend('Experimental', 'Laura phase, a = 2.3')
+
+
+% subplot(3,2,5)
+% plot(bias3, expSpec3, 'b','LineWidth', 2);
+% hold on
+% plot(bias3, sim_pred_spec2, '.r', 'LineWidth', 2);
+% 
+% subplot(3,2,6)
+% plot(bias3, expSpec3, 'b','LineWidth', 2);
+% hold on
+% plot(bias3, sim_pred_spec2_newA, '.r', 'LineWidth', 2);
+
+
 
 
 
