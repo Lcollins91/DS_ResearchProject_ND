@@ -6,7 +6,7 @@
 close all
 
 %File path for Laura's laptop
-fn1 = '/Users/lauracollins/Desktop/Data/2016-08-29 Copper - Fibonacci/';
+fn1 = '/Users/lauracollins/Desktop/Data/2017-08-29 Copper - Fibonacci/';
 
 %File path for network drive location
 %fn1 = 'Z:/gomeslab/Data/2016/2016-08-29 Copper - Fibonacci/';
