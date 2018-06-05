@@ -127,7 +127,7 @@ imagesc(x,x,topofile.Zf)
 axis image 
 hold on
 scatter(hex1(:,1), hex1(:,2))
-scatter(hex_exp2(:,1), hex_exp2(:,2))
+scatter(hex_exp2(:,1), hex_exp2(:,2),  'LineWidth', 20)
 
 vpCO = hex_exp2;
 
@@ -211,7 +211,7 @@ csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonBias_v2.csv',
 
 
 %% Comparing Simulation with Predicted Phase to Experimental 
-close all 
+
 
 new_a = 2.42;
 vpCO_v2 = hexagon_v2(new_a);
