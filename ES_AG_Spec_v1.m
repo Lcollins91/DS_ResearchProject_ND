@@ -33,8 +33,8 @@ for i = 1:training_size
 end
 
 %% Saving the training data
-save('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/ES_AG_Spec_data.mat', 'training');
-csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/ES_AG_Spec_data.csv', training);
+save('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/ES_AG_Spec_data_SCALED.mat', 'training');
+csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/ES_AG_Spec_data_SCALED.csv', training);
 %% Point Specs on Hex lattices
 % Measurement with 10a spacing. % save for predicting data
 load 'Spec10a.mat'
@@ -54,16 +54,14 @@ end
 %% Create Data for Experimental Predicting 
 v = v/1000;
 v = reshape(v, 1, 1001);
-disp(length(v));
-disp(length(E));
 topSide_pnts = resample(h10tr, length(E), length(v));
 bondSide_pnts = resample(h10br, length(E), length(v));
 topSide_pnts = reshape(topSide_pnts, 1, 451);
 bondSide_pnts = reshape(bondSide_pnts, 1, 451);
 all_cols = [0.1, 0.1, topSide_pnts, bondSide_pnts];
 %% Saving the training data
-save('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/ES_AG_Exp_data.mat', 'all_cols');
-csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/ES_AG_Exp_data.csv', all_cols);
+save('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/ES_AG_Exp_data_SCALED.mat', 'all_cols');
+csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/ES_AG_Exp_data_SCALED.csv', all_cols);
 
 %% Plotting 
 figure; plot(v,h10tr,E*1000,simh10(:,1));
