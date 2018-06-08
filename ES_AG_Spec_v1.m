@@ -7,7 +7,7 @@ a0 = abc.a; % space between CO atoms
 nhex = 5; % radius of hex, number of COs from center diagonally
 nspec = 451;
 E = linspace(-0.4, 0.5, nspec); % energies
-sf =10; % scale factor, spacing between each CO (sf*a0)
+sf =10*0.964; % scale factor, spacing between each CO (sf*a0) % 0.964 is hack for fixing dispersion
 
 % Defining the geometry of artificial graphene lattice
 vp = khex(nhex, sf*a0,1); % position of COs
