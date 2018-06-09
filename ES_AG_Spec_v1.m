@@ -7,7 +7,7 @@ a0 = abc.a; % space between CO atoms
 nhex = 5; % radius of hex, number of COs from center diagonally
 nspec = 451;
 E = linspace(-0.4, 0.5, nspec); % energies
-sf =10*0.964; % scale factor, spacing between each CO (sf*a0) % 0.964 is hack for fixing dispersion
+sf =10; % scale factor, spacing between each CO (sf*a0) % 0.964 is hack for fixing dispersion
 
 % Defining the geometry of artificial graphene lattice
 vp = khex(nhex, sf*a0,1); % position of COs
@@ -33,8 +33,8 @@ for i = 1:training_size
 end
 
 %% Saving the training data
-save('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/ES_AG_Spec_data_SCALED.mat', 'training');
-csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/ES_AG_Spec_data_SCALED.csv', training);
+save('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/ES_AG_Spec_data.mat', 'training');
+csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/ES_AG_Spec_data.csv', training);
 %% Point Specs on Hex lattices
 % Measurement with 10a spacing. % save for predicting data
 load 'Spec10a.mat'
@@ -60,8 +60,8 @@ topSide_pnts = reshape(topSide_pnts, 1, 451);
 bondSide_pnts = reshape(bondSide_pnts, 1, 451);
 all_cols = [0.1, 0.1, topSide_pnts, bondSide_pnts];
 %% Saving the training data
-save('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/ES_AG_Exp_data_SCALED.mat', 'all_cols');
-csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/ES_AG_Exp_data_SCALED.csv', all_cols);
+save('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/ES_AG_Exp_data.mat', 'all_cols');
+csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/ES_AG_Exp_data.csv', all_cols);
 
 %% Plotting 
 figure; plot(v,h10tr,E*1000,simh10(:,1));

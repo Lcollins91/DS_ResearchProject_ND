@@ -53,11 +53,11 @@ Subheading do not represent subfolders, just subcategories of data within the He
 Subheading do not represent subfolders, just subcategories of data within the Hexagon folder. 
 
 #### Experimental Data
-* ES_AG_Exp_data_SCALED.csv/.mat
+* ES_AG_Exp_data_SCALED.csv/.mat (the scale factor in this file has been hacked, multiplied by 0.964 to account for the faulty dispersion)
 * ES_AG_Exp_data.csv/.mat
 * Spec10a.mat
 
 #### Training Data
-* ES_AG_Spec_data_SCALED.csv/.mat
+* ES_AG_Spec_data_SCALED.csv/.mat (this uses the Scaled training points) 
 * ES_AG_Spec_data.csv/.mat
 

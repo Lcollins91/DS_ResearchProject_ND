@@ -1,6 +1,6 @@
 %%
-cd('/Users/ken/Documents/Notre Dame/Research/Projects/Scattering Optimization')
-
+cd('/Users/emory/Documents/GitHub/DS_ResearchProject_ND')
+close all
 %% Point Specs on Hex lattices
 % Measurement with 10a spacing.
 load 'Spec10a.mat'
@@ -11,11 +11,11 @@ h10br=h10b./h0; h10tr=h10t./h0;
 
 % sim the hexagonal lattice specs
 disp = [0.439, 0.4068, -10.996];
-a = 2.42; nhex = 5; vsim = linspace(-0.4, 0.5, 451)'; 
+a = 2.5744; nhex = 5; vsim = linspace(-0.4, 0.5, 451)'; 
 sf =10; vp = khex(nhex, sf*a,1); vspec=[0,sf*a/sqrt(3); sf*a/2,0]; 
 simh10=zeros(size(vsim,1),size(vspec,1));
 for ni=1:size(vspec,1)
-    simh10(:,ni) = kspec(vp, vspec(ni,:), vsim,(-.115646+0.030957*sqrt(-1)),disp); % change for mine to compare plots
+    simh10(:,ni) = kspec(vp, vspec(ni,:), vsim,(-.11630681+0.20520943*sqrt(-1)),disp); % change for mine to compare plots
 end
 
 figure; plot(v,h10tr,vsim*1000,simh10(:,1));
