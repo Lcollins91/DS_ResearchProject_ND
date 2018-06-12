@@ -15,8 +15,8 @@ a = 2.5744; nhex = 5; vsim = linspace(-0.4, 0.5, 451)';
 sf =10; vp = khex(nhex, sf*a,1); vspec=[0,sf*a/sqrt(3); sf*a/2,0]; 
 simh10=zeros(size(vsim,1),size(vspec,1));
 
-deltaR = -.09230312; 
-deltaI = 0.18916686; 
+deltaR = -.156145; 
+deltaI = 0.031706; 
 for ni=1:size(vspec,1)
     simh10(:,ni) = kspec(vp, vspec(ni,:), vsim,(deltaR+deltaI*sqrt(-1)),disp); 
 end
