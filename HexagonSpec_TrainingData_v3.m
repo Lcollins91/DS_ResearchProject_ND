@@ -170,7 +170,7 @@ findpeaks(test2, bias3, 'sortstr', 'descend', 'npeaks', 4);
 
 %% Generating specs for a range of deltas, and scale factors
 
-training_size = 5000;
+training_size = 10000;
 %training_size = 2;
 training1 = cell(training_size,2);
 
@@ -239,9 +239,9 @@ csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexago
 
 %% Saving the training data
 
-save('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData061318_v5.mat', 'trainingA');
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData061318_v5.csv', trainingA);
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonBias_v5.csv', bias_sim);
+save('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData061518_v6.mat', 'trainingA');
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData061518_v6.csv', trainingA);
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonBias_v6.csv', bias_sim);
 
 
 %% Generate a second set of simulated training data with the predicted scale factor from the first set
