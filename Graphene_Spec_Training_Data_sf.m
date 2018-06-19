@@ -19,7 +19,7 @@ nv = 451;
 bias_sim = linspace(-0.4, 0.5, nv);
 dispersion1 = [0.439, 0.4068, -10.996];
 
-vspec = [0,0];
+%vspec = [0,0];
 abc = kconstants;
 a0 = abc.a;
 
