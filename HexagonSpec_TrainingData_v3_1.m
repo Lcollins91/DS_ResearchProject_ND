@@ -68,6 +68,7 @@ close all
 % figure;
 % findpeaks(spec3, 'MinPeakProminence', mpp)
 
+
 %Checking that the original and downsampled specs look the same
 figure; 
 plot(bias_exp2, expSpec2);
@@ -147,43 +148,66 @@ expSpecLimited = expSpec(bias>=bias_limit);
 bias3 = linspace(-0.4, 0.5, 201);
 
 delta = -0.2 + 0.2*sqrt(-1);
-delta2 = -0.5 + 0.2*sqrt(-1);
+delta2 = -0.15 + 0.05*sqrt(-1);
+delta_predicted = -0.11675 + sqrt(-1)*0.045095;
+
 dispersion1 = [0.439, 0.4068, -10.996];
-sf = 
+sf = 0.945;
 dispersion2 = [0.439, 0.4068*(sf^2), -10.996*(sf^4)];
 
 
 test1 = kspec(vpCO, [0,0], bias3, delta, dispersion1);
 test2 = kspec(vpCO, [0,0], bias3, delta2, dispersion1);
+test3 = kspec(vpCO, [0,0], bias3, delta, dispersion2);
+test4 = kspec(vpCO, [0,0], bias3, delta2, dispersion2);
+
+test_predicted = kspec(vpCO, [0,0], bias2, delta_predicted, dispersion2);
+test_pred_2 = kspec(vpCO, [0,0], bias2, delta2, dispersion2);
 
 figure; 
-plot(bias3, test1+1);
+% plot(bias3, test1);
 hold on
+plot(bias3, test2);
+% plot(bias3, test3);
+plot(bias3, test4);
 plot(bias, spec1);
+legend('Unscaled Dispersion', 'Scaled Dispersion', 'Experiment')
 
+figure; 
+plot(bias_exp2, expSpec2);
+hold on
+plot(bias2, test_predicted);
+plot(bias2, test_pred_2);
+legend('Experimental', 'Predicted phase and scaled dispersion', 'Previous Predicted Phase and scaled dispersion')
+
+
+r2_pred_1 = sum((test_predicted-expSpec2).^2)
+r2_pred_2 = sum((test_pred_2 - expSpec2).^2)
+
+rmse_pred_1 = sqrt(mean((test_predicted-expSpec2).^2))
+rmse_pred_2 = sqrt(mean((test_pred_2 - expSpec2).^2))
 % Finding the four largest peaks in each. 
 
-figure;
-findpeaks(test1,bias3,'sortstr', 'descend', 'npeaks', 4)
-hold on
-findpeaks(expSpecLimited,bias2,'sortstr', 'descend', 'npeaks', 4);
-findpeaks(test2, bias3, 'sortstr', 'descend', 'npeaks', 4);
+% figure;
+% findpeaks(test1,bias3,'sortstr', 'descend', 'npeaks', 4)
+% hold on
+% findpeaks(expSpecLimited,bias2,'sortstr', 'descend', 'npeaks', 4);
+% findpeaks(test2, bias3, 'sortstr', 'descend', 'npeaks', 4);
 
 
-%% Generating specs for a range of deltas, and scale factors
-
-training_size = 10000;
+%% Generating specs for a range of deltas using the new scaled dispersion
+training_size = 12000;
 %training_size = 2;
 training1 = cell(training_size,2);
 
 rng('default'); 
-vars = rand([3,1,training_size]);
+vars = rand([2,1,training_size]);
 %delta I should be from 0 to 1
 %delta R should be between -pi/2 to 0
 vars(2,1,:) = (vars(2,1,:)-1)*pi/2;
 
-%scale_factor should be between 0.9 and 1.1
-vars(3,1,:) = vars(3,1,:)./5+0.9;
+% %scale_factor should be between 0.9 and 1.1
+% vars(3,1,:) = vars(3,1,:)./5+0.9;
 
 %x_sim = linspace(0,140,nspec);
 %k_sim = kv2k(E,dispersion1);
@@ -191,15 +215,20 @@ vars(3,1,:) = vars(3,1,:)./5+0.9;
 % nv = 201;
 % bias3 = linspace(-0.4, 0.5, nv);
 % bias4 = linspace(-0.25, 0.25, nv);
+
 nv = 451;
 bias_sim = linspace(-0.4, 0.5, nv);
 dispersion1 = [0.439, 0.4068, -10.996];
+sf = 0.945;
+dispersion2 = [0.439, 0.4068*(sf^2), -10.996*(sf^4)];
 
 vspec = [0,0];
 abc = kconstants;
 a0 = abc.a;
 np = 4; %number of peaks
-trainingA = zeros(training_size, (3+4*np));
+trainingA = zeros(training_size, (2+4*np));
+
+vpCO = hexagon_v2(a0);
 
 for i = 1:training_size
     
@@ -209,12 +238,12 @@ for i = 1:training_size
     
     delta = deltaR+sqrt(-1)*deltaI;
     
-    scale_factor = vars(3,1,i);
+    %scale_factor = vars(3,1,i);
     
-    vpCO_temp = hexagon_v2(scale_factor*a0);
+    %vpCO_temp = hexagon_v2(scale_factor*a0);
     
-    training1{i,1} = [deltaI, deltaR, scale_factor];
-    training1{i,2} = kspec(vpCO_temp, vspec, bias_sim, delta, dispersion1);
+    training1{i,1} = [deltaI, deltaR];
+    training1{i,2} = kspec(vpCO, vspec, bias_sim, delta, dispersion2);
     
     [pks, locs, w, proms] = findpeaks(training1{i,2}, bias_sim, 'sortstr', 'descend', 'npeaks', np);
     
@@ -222,7 +251,7 @@ for i = 1:training_size
     
     testA = sortrows(testA); 
 
-    trainingA(i,:) = [deltaI deltaR scale_factor testA(:,2)', testA(:,3)', testA(:,4)', testA(:,5)'];
+    trainingA(i,:) = [deltaI deltaR testA(:,2)', testA(:,3)', testA(:,4)', testA(:,5)'];
 
     i
 
@@ -237,71 +266,15 @@ testA = sortrows(testA);
 
 expSpec5 = [testA(:,2)', testA(:,3)', testA(:,4)', testA(:,5)'];
 
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonExperimental_v5.csv', expSpec5);
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonExperimental_v7.csv', expSpec5);
 
 %% Saving the training data
 
-save('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData061518_v6.mat', 'trainingA');
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData061518_v6.csv', trainingA);
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonBias_v6.csv', bias_sim);
+save('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData062118_v7.mat', 'trainingA');
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData062118_v7.csv', trainingA);
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonBias_v7.csv', bias_sim);
 
 
-%% Generate a second set of simulated training data with the predicted scale factor from the first set
-
-training_size = 12000;
-%training_size = 2;
-training1 = cell(training_size,2);
-
-rng('default'); 
-vars = rand([2,1,training_size]);
-%delta I should be from 0 to 1
-%delta R should be between -pi/2 to 0
-vars(2,1,:) = (vars(2,1,:)-1)*pi/2;
-
-% %scale_factor should be between 0.9 and 1.1
-% vars(3,1,:) = vars(3,1,:)./5+0.9;
-
-scale_factor = 0.964;
-
-%x_sim = linspace(0,140,nspec);
-%k_sim = kv2k(E,dispersion1);
-
-% nv = 201;
-% bias3 = linspace(-0.4, 0.5, nv);
-% bias4 = linspace(-0.25, 0.25, nv);
-nv = 451;
-bias_sim = linspace(-0.4, 0.5, nv);
-dispersion1 = [0.439, 0.4068, -10.996];
-
-vspec = [0,0];
-abc = kconstants;
-a0 = abc.a;
-
-trainingA = zeros(training_size, (2+nv));
-
-for i = 1:training_size
-    
-    
-    deltaI = vars(1,1,i);
-    deltaR = vars(2,1,i);
-    
-    delta = deltaR+sqrt(-1)*deltaI;
-    
-    %scale_factor = vars(3,1,i);
-    
-    vpCO_temp = hexagon_v2(scale_factor*a0);
-    
-    training1{i,1} = [deltaI, deltaR];
-    training1{i,2} = kspec(vpCO_temp, vspec, bias_sim, delta, dispersion1);
-
-    trainingA(i,:) = [deltaI deltaR training1{i,2}'];
-
-    i
-
-end
-
-
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonTrainingData060618_v5.csv', trainingA);
 
 
 %% Comparing Simulation with Predicted Phase to Experimental 
