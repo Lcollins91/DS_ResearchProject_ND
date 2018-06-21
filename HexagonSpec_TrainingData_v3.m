@@ -1,4 +1,10 @@
 %% Hexagon Spec Data
+% Want to make training data that uses a scale factor to effectively alter the
+% dispersion simulations
+
+% In this training data we will save the peak information for the four
+% largest peaks in each simulation.
+
 
 fn1 = '/Users/lauracollins/Documents/Data/2016-08-01 Hexaxgonal Corral/';
 
@@ -19,6 +25,7 @@ spec3 = 0.5*(a2.Data(:,3)+a2.Data(:,5));
 
 %Loading the bare Cu spec
 nv = 501;
+nv2 = 451;
 b1a = k3ds('GridSpec001.3ds');
 dV = 5*10^-3;
 b1=reshape(b1a.LIX,[100,nv]);
@@ -35,6 +42,7 @@ spec3 = spec3./dataCu;
 bias = a.Data(:,1);
 nv = 201;
 bias3 = linspace(-0.4, 0.5, nv);
+bias4 = linspace(-0.4, 0.5, nv2);
 expSpec = 0.5*(spec1 + spec3);
 
 %First need spec points above E = -0.4 only
@@ -42,9 +50,9 @@ bias_exp2 = bias(bias>=-0.4);
 bias_exp3 = linspace(-0.25, 0.25, nv);
 expSpec2 = expSpec(bias>= -0.4);
 
-%Now need to downsample
-expSpec3 = interp1(bias_exp2, expSpec2, bias3);
-expSpec4 = interp1(bias_exp2, expSpec2, bias_exp3);
+% %Now need to downsample
+% expSpec3 = interp1(bias_exp2, expSpec2, bias3);
+% expSpec4 = interp1(bias_exp2, expSpec2, bias_exp3);
 
 
 
@@ -63,13 +71,14 @@ close all
 %Checking that the original and downsampled specs look the same
 figure; 
 plot(bias_exp2, expSpec2);
-hold on
-plot(bias_exp3, expSpec4);
+% hold on
+% plot(bias_exp3, expSpec4);
 
 % csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonExperimentalData053118_v2.csv', expSpec4);
 % csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonExperimentalData053118_specPoints.csv', expSpec3);
 
-
+%All spec values at energies above -400mV without downsampling
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonExperimentalData061318_v4.csv', expSpec2');
 
 %% Want to compare the experimental specs to simulated
 % First peaks are a bit small, and there may be additional peaks in the
@@ -150,80 +159,95 @@ plot(bias3, test1+1);
 hold on
 plot(bias, spec1);
 
+% Finding the four largest peaks in each. 
+
 figure;
-findpeaks(test1,bias3,'MinPeakProminence', 0.04,'NPeaks', 7)
+findpeaks(test1,bias3,'sortstr', 'descend', 'npeaks', 4)
 hold on
-findpeaks(expSpecLimited,bias2, 'MinPeakProminence', 0.1, 'NPeaks', 7);
-findpeaks(test2, bias3, 'MinPeakProminence', 0.04, 'NPeaks', 7);
-legend('test1', 'test1 peaks', 'exp', 'exp peaks', 'test2', 'test2 peaks')
+findpeaks(expSpecLimited,bias2,'sortstr', 'descend', 'npeaks', 4);
+findpeaks(test2, bias3, 'sortstr', 'descend', 'npeaks', 4);
 
 
-% It would be difficult to confirm that at different phases the findpeaks function
-% is finding the same peaks, so I think I'm going to use Ken's suggestion
-% from before where we use a spec with a lower resolution as the features
-% instead of information about the peaks. It'll also help to try this out
-% since we'd have to do that for graphene anyways
+%% Generating specs for a range of deltas, and scale factors
 
-%% Demonstrating difference in peaks for Ken
-close all
-delta_R_test = linspace(-0.5, -0.05, 5);
-delta_I_test = linspace(0.05, 0.5, 5);
+training_size = 10000;
+%training_size = 2;
+training1 = cell(training_size,2);
 
-bias_test = linspace(-0.4, 0.5, 451);
-testspecs = zeros(length(bias_test), 25);
-figure;
-k = 1;
-for i = 1:5
-    for j = 1:5
-        delta_test = delta_R_test(i)+sqrt(-1)*delta_I_test(j);
-        testspecs(:,k) = kspec(vpCO, [0,0], bias_test, delta_test, dispersion1);
-        subplot(5,5,k)
-        plot(bias_test, testspecs(:,k), 'LineWidth', 2)
-        hold on
-        plot(bias2, expSpecLimited, 'LineWidth', 2)
-        %legend(strcat('Sim: ', num2str(delta_test)))
-        ylim([0, 5]); xlim([-0.4, 0.5])
-        ylabel(num2str(delta_test))
-        %axis square
-        k = k+1;
-    end
+rng('default'); 
+vars = rand([3,1,training_size]);
+%delta I should be from 0 to 1
+%delta R should be between -pi/2 to 0
+vars(2,1,:) = (vars(2,1,:)-1)*pi/2;
+
+%scale_factor should be between 0.9 and 1.1
+vars(3,1,:) = vars(3,1,:)./5+0.9;
+
+%x_sim = linspace(0,140,nspec);
+%k_sim = kv2k(E,dispersion1);
+
+% nv = 201;
+% bias3 = linspace(-0.4, 0.5, nv);
+% bias4 = linspace(-0.25, 0.25, nv);
+nv = 451;
+bias_sim = linspace(-0.4, 0.5, nv);
+dispersion1 = [0.439, 0.4068, -10.996];
+
+vspec = [0,0];
+abc = kconstants;
+a0 = abc.a;
+np = 4; %number of peaks
+trainingA = zeros(training_size, (3+4*np));
+
+for i = 1:training_size
+    
+    
+    deltaI = vars(1,1,i);
+    deltaR = vars(2,1,i);
+    
+    delta = deltaR+sqrt(-1)*deltaI;
+    
+    scale_factor = vars(3,1,i);
+    
+    vpCO_temp = hexagon_v2(scale_factor*a0);
+    
+    training1{i,1} = [deltaI, deltaR, scale_factor];
+    training1{i,2} = kspec(vpCO_temp, vspec, bias_sim, delta, dispersion1);
+    
+    [pks, locs, w, proms] = findpeaks(training1{i,2}, bias_sim, 'sortstr', 'descend', 'npeaks', np);
+    
+    testA = [locs', pks, locs', w', proms];
+    
+    testA = sortrows(testA); 
+
+    trainingA(i,:) = [deltaI deltaR scale_factor testA(:,2)', testA(:,3)', testA(:,4)', testA(:,5)'];
+
+    i
+
 end
+    
 
-mpp = 0.4;
-mph = 1.1;
+%% Getting Experimental spec into same format
 
-figure; 
-findpeaks(expSpecLimited, bias2, 'sortstr', 'descend', 'npeaks', 4)
+[pks, locs, w, proms] = findpeaks(expSpecLimited, bias_sim, 'sortstr', 'descend', 'npeaks', np);
+testA = [locs', pks, locs', w', proms];
+testA = sortrows(testA); 
+
+expSpec5 = [testA(:,2)', testA(:,3)', testA(:,4)', testA(:,5)'];
+
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonExperimental_v5.csv', expSpec5);
+
+%% Saving the training data
+
+save('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData061518_v6.mat', 'trainingA');
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData061518_v6.csv', trainingA);
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonBias_v6.csv', bias_sim);
 
 
-figure;
-k = 1;
-for i = 1:5
-    for j = 1:5
-        delta_test = delta_R_test(i)+sqrt(-1)*delta_I_test(j);
-        %testspecs(:,k) = kspec(vpCO, [0,0], bias_test, delta_test, dispersion1);
-        %figure;
-        subplot(5,5,k)
-        findpeaks(testspecs(:,k), bias_test,'sortstr', 'descend', 'npeaks', 4)
-        hold on
-        findpeaks(expSpecLimited, bias2, 'sortstr', 'descend', 'npeaks', 4)
-        %legend(strcat('Simulated: ', num2str(delta_test)), 'Sim. Peaks',  'Experimental', 'Exp. Peaks')
-        current_ylim = ylim;
-        ylim([0, current_ylim(2)]);
-        ylabel(num2str(delta_test))
+%% Generate a second set of simulated training data with the predicted scale factor from the first set
 
-        %ylim([0, 3]); xlim([-0.4, 0.5])
-        %axis square
-        k = k+1;
-    end
-end
-        
-%figure(2)
-
-%% Generating specs for a range of deltas
-
-training_size = 3000;
-training_size = 2;
+training_size = 12000;
+%training_size = 2;
 training1 = cell(training_size,2);
 
 rng('default'); 
@@ -231,13 +255,25 @@ vars = rand([2,1,training_size]);
 %delta I should be from 0 to 1
 %delta R should be between -pi/2 to 0
 vars(2,1,:) = (vars(2,1,:)-1)*pi/2;
+
+% %scale_factor should be between 0.9 and 1.1
+% vars(3,1,:) = vars(3,1,:)./5+0.9;
+
+scale_factor = 0.964;
+
 %x_sim = linspace(0,140,nspec);
 %k_sim = kv2k(E,dispersion1);
 
-nv = 201;
-bias3 = linspace(-0.4, 0.5, nv);
-bias4 = linspace(-0.25, 0.25, nv);
+% nv = 201;
+% bias3 = linspace(-0.4, 0.5, nv);
+% bias4 = linspace(-0.25, 0.25, nv);
+nv = 451;
+bias_sim = linspace(-0.4, 0.5, nv);
+dispersion1 = [0.439, 0.4068, -10.996];
+
 vspec = [0,0];
+abc = kconstants;
+a0 = abc.a;
 
 trainingA = zeros(training_size, (2+nv));
 
@@ -246,52 +282,60 @@ for i = 1:training_size
     
     deltaI = vars(1,1,i);
     deltaR = vars(2,1,i);
+    
     delta = deltaR+sqrt(-1)*deltaI;
     
+    %scale_factor = vars(3,1,i);
+    
+    vpCO_temp = hexagon_v2(scale_factor*a0);
+    
     training1{i,1} = [deltaI, deltaR];
-    training1{i,2} = kspec(vpCO, vspec, bias4, delta, dispersion1);
+    training1{i,2} = kspec(vpCO_temp, vspec, bias_sim, delta, dispersion1);
 
     trainingA(i,:) = [deltaI deltaR training1{i,2}'];
 
     i
 
 end
-    
 
 
-%% Saving the training data
-
-save('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonTrainingData053118_v2.mat', 'trainingA');
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonTrainingData053118_v2.csv', trainingA);
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonBias_v2.csv', bias4);
-
-
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonTrainingData060618_v5.csv', trainingA);
 
 
 %% Comparing Simulation with Predicted Phase to Experimental 
 
-
+vpCO = hexagon_v2(a0);
 new_a = 2.42;
 vpCO_v2 = hexagon_v2(new_a);
 vpCO_v3 = hexagon_v2(2.3);
 
+scale_factor_ML = 0.964;
+vpCO_ML = hexagon_v2(scale_factor_ML*a0);
+dispersion1 = [0.439, 0.4068, -10.996];
 
-pred_phase = -0.03 + sqrt(-1)*0.175; 
+
+ML_phase_sf = -0.105 + sqrt(-1)*0.175;
+
+Laura_pred_phase = -0.03 + sqrt(-1)*0.175; 
 Emory_pred_phase = -0.15 + sqrt(-1)*0.05;
 pred_phase_2 = 0.395*sqrt(-1) -0.104;
 
-sim_pred_spec = kspec(vpCO, vspec, bias3, pred_phase);
-sim_pred_spec1 = kspec(vpCO, vspec, bias3, Emory_pred_phase);
-sim_pred_spec2 = kspec(vpCO, vspec, bias_exp3, pred_phase_2);
+sim_pred_spec = kspec(vpCO, vspec, bias3, Laura_pred_phase,dispersion1);
+sim_pred_spec1 = kspec(vpCO, vspec, bias3, Emory_pred_phase, dispersion1);
+sim_pred_spec2 = kspec(vpCO, vspec, bias_exp3, pred_phase_2, dispersion1);
 
-sim_pred_spec_newA = kspec(vpCO_v2, vspec, bias3, pred_phase);
-sim_pred_spec1_newA = kspec(vpCO_v2, vspec, bias3, Emory_pred_phase);
-sim_pred_spec2_newA = kspec(vpCO_v2, vspec, bias_exp3, pred_phase_2); 
 
-sim_pred_spec_newA_v3 = kspec(vpCO_v3, vspec, bias3, pred_phase);
-sim_pred_spec1_newA_v3 = kspec(vpCO_v3, vspec, bias3, Emory_pred_phase);
-sim_pred_spec2_newA_v3 = kspec(vpCO_v3, vspec, bias_exp3, pred_phase_2); 
+sim_pred_spec_newA = kspec(vpCO_v2, vspec, bias3, Laura_pred_phase, dispersion1);
+sim_pred_spec1_newA = kspec(vpCO_v2, vspec, bias3, Emory_pred_phase, dispersion1);
+sim_pred_spec2_newA = kspec(vpCO_v2, vspec, bias_exp3, pred_phase_2, dispersion1); 
 
+sim_pred_spec_newA_v3 = kspec(vpCO_v3, vspec, bias3, Laura_pred_phase, dispersion1);
+sim_pred_spec1_newA_v3 = kspec(vpCO_v3, vspec, bias3, Emory_pred_phase, dispersion1);
+sim_pred_spec2_newA_v3 = kspec(vpCO_v3, vspec, bias_exp3, pred_phase_2, dispersion1); 
+
+sim_pred_spec_MLsf_MLP = kspec(vpCO_ML, vspec, bias3, ML_phase_sf, dispersion1);
+sim_pred_spec_MLsf_LP = kspec(vpCO_ML, vspec, bias3, Laura_pred_phase, dispersion1);
+sim_pred_spec_MLsf_EP = kspec(vpCO_ML, vspec, bias3, Emory_pred_phase, dispersion1);
 
 figure; 
 subplot(1,2,1)
@@ -353,6 +397,30 @@ plot(bias3, expSpec3, 'b','LineWidth', 2);
 hold on
 plot(bias3, sim_pred_spec_newA_v3, '.r', 'LineWidth', 2);
 legend('Experimental', 'Laura phase, a = 2.3')
+
+figure;
+subplot(1,3,1)
+plot(bias3, expSpec3, 'b','LineWidth', 2);
+hold on
+plot(bias3, sim_pred_spec_MLsf_MLP, '.r', 'LineWidth', 2);
+legend('Experimental', 'new ML phase, delta = -0.105 + i*0.175, a = 2.456')
+axis square
+
+subplot(1,3,2)
+plot(bias3, expSpec3, 'b','LineWidth', 2);
+hold on
+plot(bias3, sim_pred_spec_MLsf_LP, '.r', 'LineWidth', 2);
+legend('Experimental', 'Laura phase, a = 2.456')
+axis square
+
+subplot(1,3,3)
+plot(bias3, expSpec3, 'b','LineWidth', 2);
+hold on
+plot(bias3, sim_pred_spec_MLsf_EP, '.r', 'LineWidth', 2);
+legend('Experimental', 'Emory phase, a = 2.456')
+axis square
+
+
 
 
 % subplot(3,2,5)
