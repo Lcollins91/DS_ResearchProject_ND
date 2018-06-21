@@ -30,22 +30,22 @@ Subheading do not represent subfolders, just subcategories of data within the He
 * **NewHexagonNGEFPoints.csv**: This file is the conversion of the points in hexagon.ngef to a .csv file and was generated using the "Convert hexagon.ngef to csv.ipynb" notebook, since the .ngef file cannot be read directly by MATLAB.
 
 #### Bias Files
-* **HexagonBias.csv**:
-* **HexagonBias_v2.csv**:
-* **HexagonBias_v3.csv**:
-* **HexagonBias_v4.csv**:
+* **HexagonBias.csv**: Bias ranging from -0.4V to 0.5V with 201 points total.
+* **HexagonBias_v2.csv**: Bias ranging from -0.25V to 0.25V with 201 points total.
+* **HexagonBias_v3.csv**: Bias ranging from -0.4V to 0.5V with 451 points total.
+* **HexagonBias_v4.csv**: Bias ranging from -0.4V to 0.5V with 451 points total.
 
 #### Experimental Data
-* HexagonExperimentalData053118_specPoints.csv
-* HexagonExperimentalData053118_v2.csv
-* HexagonExperimentalData060618_v3.csv
+* **HexagonExperimentalData053118_specPoints.csv**: 
+* **HexagonExperimentalData053118_v2.csv**:
+* **HexagonExperimentalData060618_v3.csv**:
 
 #### Training Data
-* HexagonTrainingData052818_specPoints.csv/.mat
-* HexagonTrainingData053118_v2.csv/.mat
-* HexagonTrainingData060518_c3.csv/.mat
-* HexagonTrainingData060518_v4.csv/.mat
-* HexagonTrainingData060618_v5.csv
+* **HexagonTrainingData052818_specPoints.csv/.mat**:
+* **HexagonTrainingData053118_v2.csv/.mat**:
+* **HexagonTrainingData060518_c3.csv/.mat**:
+* **HexagonTrainingData060518_v4.csv/.mat**:
+* **HexagonTrainingData060618_v5.csv**:
 
 
 ## Graphene Folder
@@ -53,11 +53,11 @@ Subheading do not represent subfolders, just subcategories of data within the He
 Subheading do not represent subfolders, just subcategories of data within the Hexagon folder. 
 
 #### Experimental Data
-* ES_AG_Exp_data_SCALED.csv/.mat
+* ES_AG_Exp_data_SCALED.csv/.mat (the scale factor in this file has been hacked, multiplied by 0.964 to account for the faulty dispersion)
 * ES_AG_Exp_data.csv/.mat
 * Spec10a.mat
 
 #### Training Data
-* ES_AG_Spec_data_SCALED.csv/.mat
+* ES_AG_Spec_data_SCALED.csv/.mat (this uses the Scaled training points) 
 * ES_AG_Spec_data.csv/.mat
 
