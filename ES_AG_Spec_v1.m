@@ -1,13 +1,13 @@
 %% Creating a model to predict deltaI and deltaR 
 
 % Defining parameters for simulation
-dispersion = [0.439, 0.4068, -10.996]; % coefficients for: E = E0 + ak^2 + bk^2
+dispersion = [0.439, 0.4068*0.945^2, -10.996*0.945^4]; % coefficients for: E = E0 + ak^2 + bk^2
 abc = kconstants; % physical parameters of copper
 a0 = abc.a; % space between CO atoms
 nhex = 5; % radius of hex, number of COs from center diagonally
 nspec = 451;
 E = linspace(-0.4, 0.5, nspec); % energies
-sf =10; % scale factor, spacing between each CO (sf*a0) % 0.964 is hack for fixing dispersion
+sf =10; % scale factor, spacing between each CO (sf*a0) 
 
 % Defining the geometry of artificial graphene lattice
 vp = khex(nhex, sf*a0,1); % position of COs
@@ -33,8 +33,8 @@ for i = 1:training_size
 end
 
 %% Saving the training data
-save('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/ES_AG_Spec_data.mat', 'training');
-csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/ES_AG_Spec_data.csv', training);
+save('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/Graphene/ES_AG_Spec_data_changeDispersion_0.945.mat', 'training');
+csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/Graphene/ES_AG_Spec_data_changeDispersion_0.945.csv', training);
 %% Point Specs on Hex lattices
 % Measurement with 10a spacing. % save for predicting data
 load 'Spec10a.mat'
@@ -44,8 +44,8 @@ h10br=h10b./h0; h10tr=h10t./h0;
 figure; plot(v,[h10br h10tr]);
 
 % sim the hexagonal lattice specs
-a = 2.55; nhex = 5; E = linspace(-0.4, 0.5, 451)'; 
-sf =10; vp = khex(nhex, sf*a,1); vspec=[0,sf*a/sqrt(3); sf*a/2,0]; 
+a = 2.5477; nhex = 5; E = linspace(-0.4, 0.5, 451)'; 
+sf =10*0.945; vp = khex(nhex, sf*a,1); vspec=[0,sf*a/sqrt(3); sf*a/2,0]; 
 simh10=zeros(size(E,1),size(vspec,1));
 for ni=1:size(vspec,1)
     simh10(:,ni) = kspec(vp, vspec(ni,:), E,(-.15+0.05*sqrt(-1)));
@@ -56,8 +56,8 @@ topSide_pnts = interp1(v/1000, h10tr, E);
 bondSide_pnts = interp1(v/1000, h10br, E); 
 all_cols = [topSide_pnts', bondSide_pnts'];
 %% Saving the training data
-save('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/ES_AG_Exp_data.mat', 'all_cols');
-csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/ES_AG_Exp_data.csv', all_cols);
+save('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/Graphene/ES_AG_Exp_data_changeDispersion_0.945.mat', 'all_cols');
+csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/Graphene/ES_AG_Exp_data_changeDispersion_0.945.csv', all_cols);
 
 %% Plotting 
 figure; plot(v,h10tr,E*1000,simh10(:,1));
