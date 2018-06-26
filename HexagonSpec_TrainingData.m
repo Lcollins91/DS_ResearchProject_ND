@@ -104,8 +104,8 @@ hex_exp = csvread('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Da
 
 %This is in nm, convert to Angstroms
 hex_exp = hex_exp*10;
-
 scatter(hex_exp(:,1), hex_exp(:,2))
+
 
 % scan angle from topograph is 128, rotating back hex_exp to see what the
 % spacing is. should line up with hex1 then

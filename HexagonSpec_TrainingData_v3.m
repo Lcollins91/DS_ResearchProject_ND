@@ -149,7 +149,7 @@ bias3 = linspace(-0.4, 0.5, 201);
 delta = -0.2 + 0.2*sqrt(-1);
 delta2 = -0.5 + 0.2*sqrt(-1);
 dispersion1 = [0.439, 0.4068, -10.996];
-sf = 
+sf = 0.945;
 dispersion2 = [0.439, 0.4068*(sf^2), -10.996*(sf^4)];
 
 
