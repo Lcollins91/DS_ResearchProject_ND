@@ -222,7 +222,7 @@ vars = rand([5, 1, training_size]);
 %mstar should be between __ and __
 % alpha should be between __ and __
 vars(2,1,:) = (vars(2,1,:)-1)*pi/2;
-vars(3,1,:) = vars(3,1,:)*0.5 + 0.425;
+vars(3,1,:) = vars(3,1,:)*0.1 + 0.401;
 vars(4,1,:) = vars(4,1,:)*0.15 + 0.3;
 vars(5,1,:) = vars(5,1,:)*10 - 15;
 
@@ -269,9 +269,9 @@ end
 
 close(f)
 
-
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData062618_v9_specPoints.csv', trainingA);
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData062618_v9_peakinfo.csv', trainingB);
+%%
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData062718_v9_specPoints.csv', trainingA);
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData062718_v9_peakinfo.csv', trainingB);
 
 
 
