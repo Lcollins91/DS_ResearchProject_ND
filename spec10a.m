@@ -9,14 +9,14 @@ h10br=h10b./h0; h10tr=h10t./h0;
 %figure; plot(v,[h10br h10tr]);
 
 % sim the hexagonal lattice specs
-dsf = 0.955; % dispersion scale factor 
+dsf = 0.940; % dispersion scale factor 
 disp = [0.439, 0.4068*dsf^2, -10.996*dsf^4];
 a = 2.5477; nhex = 5; vsim = linspace(-0.4, 0.5, 451)'; 
 sf =10; vp = khex(nhex, sf*a,1); vspec=[0,sf*a/sqrt(3); sf*a/2,0]; % coordinates 
 simh10=zeros(size(vsim,1),size(vspec,1));
 
-deltaR = -0.109421667; 
-deltaI =0.0604; 
+deltaR = -0.105372333; 
+deltaI =0.049333; 
 for ni=1:size(vspec,1)
     simh10(:,ni) = kspec(vp, vspec(ni,:), vsim,(deltaR+deltaI*sqrt(-1)),disp); 
 end
@@ -25,12 +25,12 @@ figure; plot(v,h10tr, 'r')
 hold on 
 plot(vsim*1000, simh10(:,1), 'b');
 legend('experimental', 'predicted');
-title('Top Side: dR = -0.109421667, dI = 0.0604i');
+title('Top Side: dR =  -0.105372333, dI = 0.049333i');
 figure;plot(v,h10br, 'r')
 hold on
 plot(vsim*1000,simh10(:,2), 'b');
 legend('experimental', 'predicted');
-title('Bond Side: dR = -0.109421667, dI = 0.0604i');
+title('Bond Side: dR =  -0.105372333, dI = 0.049333i');
 %% splitting sim 
 simh10tr = simh10(:, 1); 
 simh10br  = simh10(:, 2); 

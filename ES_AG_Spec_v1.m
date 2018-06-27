@@ -1,7 +1,7 @@
 %% Creating a model to predict deltaI and deltaR 
 
 % Defining parameters for simulation
-dsf = 0.945; % dispersion scale factor 
+dsf = 0.940; % dispersion scale factor 
 dispersion = [0.439, 0.4068*dsf^2, -10.996*dsf^4]; % coefficients for: E = E0 + ak^2 + bk^2
 abc = kconstants; % physical parameters of copper
 a0 = abc.a; % space between CO atoms
@@ -34,8 +34,8 @@ for i = 1:training_size
 end
 
 %% Saving the training data
-save('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/Graphene/ES_AG_Spec_data_changeDispersion_0.945.mat', 'training');
-csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/Graphene/ES_AG_Spec_data_changeDispersion_0.945.csv', training);
+save('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/Graphene/ES_AG_Spec_data_changeDispersion_0.940.mat', 'training');
+csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/Graphene/ES_AG_Spec_data_changeDispersion_0.940.csv', training);
 %% Point Specs on Hex lattices
 % Measurement with 10a spacing. % save for predicting data
 load 'Spec10a.mat'
@@ -45,7 +45,7 @@ h10br=h10b./h0; h10tr=h10t./h0;
 figure; plot(v,[h10br h10tr]);
 
 % sim the hexagonal lattice specs
-dsf = 0.945; % dispersion scale factor
+dsf = 0.940; % dispersion scale factor
 a = 2.5477; nhex = 5; E = linspace(-0.4, 0.5, 451)'; 
 sf =10*dsf; vp = khex(nhex, sf*a,1); vspec=[0,sf*a/sqrt(3); sf*a/2,0]; 
 simh10=zeros(size(E,1),size(vspec,1));
@@ -57,10 +57,10 @@ end
 topSide_pnts = interp1(v/1000, h10tr, E); 
 bondSide_pnts = interp1(v/1000, h10br, E); 
 all_cols = [topSide_pnts', bondSide_pnts'];
-disp('done creating experimental');
+%disp('done creating experimental');
 %% Saving the training data
-save('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/Graphene/ES_AG_Exp_data_changeDispersion_0.945.mat', 'all_cols');
-csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/Graphene/ES_AG_Exp_data_changeDispersion_0.945.csv', all_cols);
+save('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/Graphene/ES_AG_Exp_data_changeDispersion_0.940.mat', 'all_cols');
+csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/Graphene/ES_AG_Exp_data_changeDispersion_0.940.csv', all_cols);
 
 %% Plotting 
 figure; plot(v,h10tr,E*1000,simh10(:,1));

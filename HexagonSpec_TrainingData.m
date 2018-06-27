@@ -4,43 +4,43 @@ fn1 = '/Users/lauracollins/Desktop/Data/2016-08-01 Hexaxgonal Corral/';
 
 cd(fn1)
 
-dv5 = 5*10^-3;
+dv5 = 5*10^-3; % bias voltage applied 
 mpp = 0.1;
 
-% Load the data
+% Load the experimental data
 a = kdat('BiasSpec001.dat');
 a1 = kdat('BiasSpec002.dat');
 a2 = kdat('BiasSpec003.dat');
 
-%Average forward and backward
-spec1 = 0.5*(a.Data(:,3)+a.Data(:,5)); 
-spec2 = 0.5*(a1.Data(:,3)+a1.Data(:,5));  %only 201 points
-spec3 = 0.5*(a2.Data(:,3)+a2.Data(:,5));
+% Average forward and backward
+spec1 = 0.5*(a.Data(:,3)+a.Data(:,5)); % 501 points
+spec2 = 0.5*(a1.Data(:,3)+a1.Data(:,5));  % only 201 points
+spec3 = 0.5*(a2.Data(:,3)+a2.Data(:,5)); % 501 points
 
 %Loading the bare Cu spec
 nv = 501;
 b1a = k3ds('GridSpec001.3ds');
 dV = 5*10^-3;
-b1=reshape(b1a.LIX,[100,nv]);
+b1=reshape(b1a.LIX,[100,nv]); % change 10 x 10 x 401 to 100 x num spec points 
 dataCu=mean(b1)'*10^9;
 
 %Ignoring spec2, since it has a different number of points
 spec1 = spec1*10^9;
 spec3 = spec3*10^9;
 
-%Normalize by bare Cu
+%Normalize by bare Cu, remove noise 
 spec1 = spec1./dataCu;
 spec3 = spec3./dataCu;
 
 bias = a.Data(:,1);
 nv = 201;
 bias3 = linspace(-0.4, 0.5, nv);
-expSpec = 0.5*(spec1 + spec3);
+expSpec = 0.5*(spec1 + spec3); % reduce noise 
 
 %First need spec points above E = -0.4 only
-bias_exp2 = bias(bias>=-0.4);
-bias_exp3 = linspace(-0.25, 0.25, nv);
-expSpec2 = expSpec(bias>= -0.4);
+bias_exp2 = bias(bias>=-0.4); % energy vector 
+bias_exp3 = linspace(-0.25, 0.25, nv); % smaller range 
+expSpec2 = expSpec(bias>= -0.4); % same amount as in experimental data 
 
 %Now need to downsample
 expSpec3 = interp1(bias_exp2, expSpec2, bias3);
@@ -77,7 +77,7 @@ csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonExperimentalD
 
 close all
 
-hex1 = hexagon(1);
+hex1 = hexagon(1); % coordinates 
 hex2 = hexagon2(1);
 mpp = 0.1;
 bias_limit = -0.4;
@@ -85,7 +85,7 @@ bias_limit = -0.4;
 x = linspace(-90,90,256);
 
 
-topofile = ksxm('Topo021.sxm');
+topofile = ksxm('Topo021.sxm'); % topograph 
 
 figure;
 plot(x,topofile.Zf(:,128)*10^9)
