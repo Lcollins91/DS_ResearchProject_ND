@@ -528,6 +528,7 @@ vars(3,1,:) = vars(3,1,:)*0.1 + 0.401;
 vars(4,1,:) = vars(4,1,:)*0.15 + 0.3;
 vars(5,1,:) = vars(5,1,:)*10 - 15;
 
+vars(2,1,:) = linspace(-pi/2, 0, training_size);
 
 np = 4;
 trainingA = zeros(training_size, (5 + nv));
@@ -572,8 +573,8 @@ end
 close(f)
 
 %% 
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData070518_v13_E0MaDifixed_specPoints.csv', trainingA);
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData070518_v13_E0MaDifixed_peakinfo.csv', trainingB);
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData070518_v13a_E0MaDifixed_specPoints.csv', trainingA);
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData070518_v13a_E0MaDifixed_peakinfo.csv', trainingB);
 
 
 
