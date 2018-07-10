@@ -154,13 +154,19 @@ delta_predicted = -0.11675 + sqrt(-1)*0.045095;
 
 dispersion1 = [0.439, 0.4068, -10.996];
 sf = 0.945;
-dispersion2 = [0.439, 0.4068*(sf^2), -10.996*(sf^4)];
 
+dispersion2 = [0.439, 0.4068*(sf^2), -10.996/(sf^4)];
+sf_ken = 0.93;
+dispersion_ken = [0.450, 0.4068*(sf_ken^2), -10.996/(sf_ken^4)];
+vpCO1 = hexagon_v2(a0);
+vpCO2 = hexagon_v2(sf*a0);
 
-test1 = kspec(vpCO, [0,0], bias3, delta, dispersion1);
-test2 = kspec(vpCO, [0,0], bias3, delta2, dispersion1);
-test3 = kspec(vpCO, [0,0], bias3, delta, dispersion2);
-test4 = kspec(vpCO, [0,0], bias3, delta2, dispersion2);
+test1 = kspec(vpCO1, [0,0], bias3, delta, dispersion1);
+test2 = kspec(vpCO1, [0,0], bias3, delta2, dispersion1);
+test3 = kspec(vpCO1, [0,0], bias3, delta, dispersion2);
+test4 = kspec(vpCO1, [0,0], bias3, delta2, dispersion2);
+
+test_ken = kspec(vpCO1, [0,0], bias3, delta2, dispersion_ken);
 
 test_predicted = kspec(vpCO, [0,0], bias2, delta_predicted, dispersion2);
 test_pred_2 = kspec(vpCO, [0,0], bias2, delta2, dispersion2);
@@ -173,8 +179,9 @@ plot(bias3, test2);
 % plot(bias3, test3);
 plot(bias3, test4);
 plot(bias, spec1);
+plot(bias3, test_ken);
 
-legend('Unscaled Dispersion', 'Scaled Dispersion', 'Experiment')
+legend('Unscaled Dispersion', 'Scaled Dispersion', 'Experiment', 'Ken')
 
 figure; 
 plot(bias_exp2, expSpec2);
