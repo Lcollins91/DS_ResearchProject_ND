@@ -587,7 +587,7 @@ a0 = abc.a;
 
 
 %% Getting Experimental spec into same format
-print('not yet') 
+
 fn1 ='2016-08-01 Hexaxgonal Corral/';
 print('yes')
 cd(fn1)
