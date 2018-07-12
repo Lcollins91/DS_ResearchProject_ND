@@ -330,7 +330,8 @@ for i = 1:training_size
     
     deltaI = vars(1,1,i);
     deltaR = vars(2,1,i);
-    temp_E_0 = 0.4473;
+    %temp_E_0 = 0.4473; %initial fixed value
+    temp_E_0 = 0.44839; % fixed value after training with limited spec range and removing peak1 and prom1
     temp_mstar = vars(4,1,i);
     temp_alpha = vars(5,1,i);
     
@@ -361,8 +362,8 @@ end
 close(f)
 
 %% 
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData062818_v10_E0fixed_specPoints.csv', trainingA);
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData062818_v10_E0fixed_peakinfo.csv', trainingB);
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071218_v10_E0fixed_specPoints.csv', trainingA);
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071218_v10_E0fixed_peakinfo.csv', trainingB);
 
 %% Simulating training data with spec points, and training data with peak info
 % Using random phases and dispersion values. 
