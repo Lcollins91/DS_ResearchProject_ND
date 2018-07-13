@@ -406,8 +406,11 @@ for i = 1:training_size
     
     deltaI = vars(1,1,i);
     deltaR = vars(2,1,i);
-    temp_E_0 = 0.4473;
-    temp_mstar = 0.3771;
+%     temp_E_0 = 0.4473;
+%     temp_mstar = 0.3771;
+
+    temp_E_0 = 0.44839;
+    temp_mstar = 0.377998;
     temp_alpha = vars(5,1,i);
     
     delta = deltaR+sqrt(-1)*deltaI;
@@ -437,8 +440,8 @@ end
 close(f)
 
 %% 
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData070318_v11_E0Mfixed_specPoints.csv', trainingA);
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData070318_v11_E0Mfixed_peakinfo.csv', trainingB);
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071318_v11_E0Mfixed_specPoints.csv', trainingA);
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071318_v11_E0Mfixed_peakinfo.csv', trainingB);
 
 
 %% Simulating training data with spec points, and training data with peak info
@@ -482,9 +485,13 @@ for i = 1:training_size
     
     deltaI = vars(1,1,i);
     deltaR = vars(2,1,i);
-    temp_E_0 = 0.4473;
-    temp_mstar = 0.3771;
-    temp_alpha = -12.5968;
+%     temp_E_0 = 0.4473;
+%     temp_mstar = 0.3771;
+%     temp_alpha = -12.5968;
+
+    temp_E_0 = 0.44839;
+    temp_mstar = 0.337998;
+    temp_alpha = -12.3527;
     
     delta = deltaR+sqrt(-1)*deltaI;
     temp_dispersion = [temp_E_0, temp_mstar, temp_alpha];
@@ -513,8 +520,8 @@ end
 close(f)
 
 %% 
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData070318_v12_E0Mafixed_specPoints.csv', trainingA);
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData070318_v12_E0Mafixed_peakinfo.csv', trainingB);
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071318_v12_E0Mafixed_specPoints.csv', trainingA);
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071318_v12_E0Mafixed_peakinfo.csv', trainingB);
 
 %% Simulating training data with spec points, and training data with peak info
 % Using random phases and dispersion values. 
@@ -544,7 +551,7 @@ vars(3,1,:) = vars(3,1,:)*0.1 + 0.401;
 vars(4,1,:) = vars(4,1,:)*0.15 + 0.3;
 vars(5,1,:) = vars(5,1,:)*10 - 15;
 
-vars(2,1,:) = linspace(-pi/2, 0, training_size);
+%vars(2,1,:) = linspace(-pi/2, 0, training_size);
 
 np = 4;
 trainingA = zeros(training_size, (5 + nv));
@@ -556,12 +563,17 @@ f = waitbar(0, 'Simulating Data');
 for i = 1:training_size
     
     
-    deltaI = 0.2420;
+%     deltaI = 0.2420;
+    deltaI = 0.02372378;
     deltaR = vars(2,1,i);
-    temp_E_0 = 0.4473;
-    temp_mstar = 0.3771;
-    temp_alpha = -12.5968;
+%     temp_E_0 = 0.4473;
+%     temp_mstar = 0.3771;
+%     temp_alpha = -12.5968;
     
+    temp_E_0 = 0.44839;
+    temp_mstar = 0.337998;
+    temp_alpha = -12.3527
+
     delta = deltaR+sqrt(-1)*deltaI;
     temp_dispersion = [temp_E_0, temp_mstar, temp_alpha];
     
@@ -589,8 +601,8 @@ end
 close(f)
 
 %% 
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData070518_v13a_E0MaDifixed_specPoints.csv', trainingA);
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData070518_v13a_E0MaDifixed_peakinfo.csv', trainingB);
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071318_v13_E0MaDifixed_specPoints.csv', trainingA);
+csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071318_v13_E0MaDifixed_peakinfo.csv', trainingB);
 
 
 
