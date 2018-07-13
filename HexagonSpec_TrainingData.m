@@ -139,7 +139,7 @@ bias3 = linspace(-0.4, 0.5, 201);
 
 delta = -0.2 + 0.2*sqrt(-1);
 delta2 = -0.5 + 0.2*sqrt(-1);
-dispersion1 = [0.439, 0.4068, -10.996];
+dispersion1 = [ 0.439, 0.3633, -13.7882];
 
 
 test1 = kspec(vpCO, [0,0], bias3, delta, dispersion1);
@@ -223,7 +223,7 @@ end
 %% Generating specs for a range of deltas
 
 training_size = 3000;
-training_size = 2;
+%training_size = 2;
 training1 = cell(training_size,2);
 
 rng('default'); 
@@ -261,8 +261,8 @@ end
 
 %% Saving the training data
 
-save('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonTrainingData053118_v2.mat', 'trainingA');
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonTrainingData053118_v2.csv', trainingA);
+save('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/HexagonTrainingData_newDisp_071018.mat', 'trainingA');
+csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/HexagonTrainingData_newDisp_071018.csv', trainingA);
 csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonBias_v2.csv', bias4);
 
 
