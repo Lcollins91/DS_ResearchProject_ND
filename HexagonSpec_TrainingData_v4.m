@@ -6,9 +6,10 @@
 % largest peaks in each simulation.
 
 
-fn1 = '/Users/lauracollins/Documents/Data/2016-08-01 Hexaxgonal Corral/';
+fn1 = '2016-08-01 Hexaxgonal Corral/';
 
 cd(fn1)
+%%
 
 dv5 = 5*10^-3;
 mpp = 0.1;
@@ -28,7 +29,7 @@ nv = 501;
 nv2 = 451;
 b1a = k3ds('GridSpec001.3ds');
 dV = 5*10^-3;
-b1=reshape(b1a.LIX,[100,nv]);
+b1=reshape(b1a.LIXf,[100,nv]);
 dataCu=mean(b1)'*10^9;
 
 %Ignoring spec2, since it has a different number of points
@@ -79,14 +80,14 @@ plot(bias_exp2, expSpec2);
 % csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonExperimentalData053118_specPoints.csv', expSpec3);
 
 %All spec values at energies above -400mV without downsampling
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/HexagonExperimentalData061318_v4.csv', expSpec2');
+csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/HexagonExperimentalData071018_v4.csv', expSpec2');
 
 %% Want to compare the experimental specs to simulated
 % First peaks are a bit small, and there may be additional peaks in the
 % experiment according to Ken
-
+abc = kconstants;
+a0 = abc.a;
 close all
-
 hex1 = hexagon(1);
 hex2 = hexagon2(1);
 mpp = 0.1;
@@ -110,7 +111,7 @@ hold on
 % scatter(hex2(:,1), hex2(:,2))
 
 %Load the points from hexagon.ngef -- were parsed using python notebook 
-hex_exp = csvread('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/NewHexagonNGEFPoints.csv', 1,1);
+hex_exp = csvread('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/Hexagon/NewHexagonNGEFPoints.csv', 1,1);
 
 %This is in nm, convert to Angstroms
 hex_exp = hex_exp*10;
@@ -210,7 +211,7 @@ rmse_pred_emory = sqrt(mean((test_emory - expSpec2).^2));
 % Using random phases and dispersion values. 
 
 sf = 0.945;
-dispersion2 = [0.439, 0.4068*(sf^2), -10.996/(sf^4)];
+dispersion2 = [ 0.439, 0.3633, -13.7882];
 
 nv = 451;
 bias_sim = linspace(-0.4, 0.5, nv);
@@ -235,90 +236,6 @@ vars(5,1,:) = vars(5,1,:)*10 - 15;
 
 
 np = 4;
-trainingA = zeros(training_size, (2 + nv));
-trainingB = zeros(training_size, (2 + 4*np));
-training1 = cell(training_size, 2);
-
-f = waitbar(0, 'Simulating Data');
-
-for i = 1:training_size
-    
-    
-    deltaI = vars(1,1,i);
-    deltaR = vars(2,1,i);
-    temp_E_0 = dispersion2(1);%vars(3,1,i);
-    temp_mstar = dispersion2(2);%vars(4,1,i);
-    temp_alpha = dispersion2(3);%vars(5,1,i);
-    
-    delta = deltaR+sqrt(-1)*deltaI;
-    temp_dispersion = [temp_E_0, temp_mstar, temp_alpha];
-    
-    %scale_factor = vars(3,1,i);
-    
-    vpCO_temp = hexagon_v2(a0);
-    
-    training1{i,1} = [deltaI, deltaR, temp_E_0, temp_mstar, temp_alpha];
-    training1{i,2} = kspec(vpCO_temp, vspec, bias_sim, delta, temp_dispersion);
-
-    [pks, locs, w, proms] = findpeaks(training1{i,2}, bias_sim, 'sortstr', 'descend', 'npeaks', np);
-    
-    testA = [locs', pks, locs', w', proms];
-    
-    testA = sortrows(testA);
-    
-    %trainingA(i,:) = [deltaI deltaR temp_E_0 temp_mstar temp_alpha training1{i,2}'];
-    %trainingB(i,:) = [deltaI deltaR temp_E_0 temp_mstar temp_alpha testA(:,2)', testA(:,3)', testA(:,4)', testA(:,5)'];
-    
-    trainingA(i,:) = [deltaI deltaR training1{i,2}'];
-    trainingB(i,:) = [deltaI deltaR testA(:,2)', testA(:,3)', testA(:,4)', testA(:,5)'];
-    
-    waitbar(i/training_size, f)
-    
-
-end
-
-close(f)
-
-%%
-
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071118_v8_specPoints.csv', trainingA);
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071118_v8_peakinfo.csv', trainingB);
-
-
-%csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData062718_v9_specPoints.csv', trainingA);
-%csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData062718_v9_peakinfo.csv', trainingB);
-
-
-%% Simulating training data with spec points, and training data with peak info
-% Using random phases and dispersion values. 
-% Using a fixed E_0 
-
-sf = 0.945;
-dispersion2 = [0.439, 0.4068*(sf^2), -10.996*(sf^4)];
-
-nv = 451;
-bias_sim = linspace(-0.4, 0.5, nv);
-
-vspec = [0,0];
-abc = kconstants;
-a0 = abc.a;
-
-training_size = 12000;
-
-rng('default'); 
-vars = rand([5, 1, training_size]);
-%delta I should be from 0 to 1 -- no change needed
-%delta R should be between -pi/2 to 0
-%E0 should be between __ and ___
-%mstar should be between __ and __
-% alpha should be between __ and __
-vars(2,1,:) = (vars(2,1,:)-1)*pi/2;
-vars(3,1,:) = vars(3,1,:)*0.1 + 0.401;
-vars(4,1,:) = vars(4,1,:)*0.15 + 0.3;
-vars(5,1,:) = vars(5,1,:)*10 - 15;
-
-
-np = 4;
 trainingA = zeros(training_size, (5 + nv));
 trainingB = zeros(training_size, (5 + 4*np));
 training1 = cell(training_size, 5);
@@ -330,8 +247,7 @@ for i = 1:training_size
     
     deltaI = vars(1,1,i);
     deltaR = vars(2,1,i);
-    %temp_E_0 = 0.4473; %initial fixed value
-    temp_E_0 = 0.44839; % fixed value after training with limited spec range and removing peak1 and prom1
+    temp_E_0 = vars(3,1,i);
     temp_mstar = vars(4,1,i);
     temp_alpha = vars(5,1,i);
     
@@ -361,6 +277,7 @@ end
 
 close(f)
 
+<<<<<<< HEAD
 %% 
 csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071218_v10_E0fixed_specPoints.csv', trainingA);
 csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071218_v10_E0fixed_peakinfo.csv', trainingB);
@@ -442,11 +359,16 @@ close(f)
 %% 
 csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071318_v11_E0Mfixed_specPoints.csv', trainingA);
 csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071318_v11_E0Mfixed_peakinfo.csv', trainingB);
+=======
+%%
+csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071018_v9_specPoints.csv', trainingA);
+csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071018_v9_peakinfo.csv', trainingB);
+>>>>>>> 2d9994974f9bb822f615d69b7c53152c68e3fdc7
 
 
 %% Simulating training data with spec points, and training data with peak info
 % Using random phases and dispersion values. 
-% Using a fixed E_0, mstar and alpha
+% Using a fixed E_0 
 
 sf = 0.945;
 dispersion2 = [0.439, 0.4068*(sf^2), -10.996*(sf^4)];
@@ -458,6 +380,7 @@ vspec = [0,0];
 abc = kconstants;
 a0 = abc.a;
 
+<<<<<<< HEAD
 training_size = 12000;
 
 rng('default'); 
@@ -603,15 +526,305 @@ close(f)
 %% 
 csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071318_v13_E0MaDifixed_specPoints.csv', trainingA);
 csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071318_v13_E0MaDifixed_peakinfo.csv', trainingB);
+=======
+% training_size = 12000;
+% 
+% rng('default'); 
+% vars = rand([5, 1, training_size]);
+% %delta I should be from 0 to 1 -- no change needed
+% %delta R should be between -pi/2 to 0
+% %E0 should be between __ and ___
+% %mstar should be between __ and __
+% % alpha should be between __ and __
+% vars(2,1,:) = (vars(2,1,:)-1)*pi/2;
+% vars(3,1,:) = vars(3,1,:)*0.1 + 0.401;
+% vars(4,1,:) = vars(4,1,:)*0.15 + 0.3;
+% vars(5,1,:) = vars(5,1,:)*10 - 15;
+% 
+% 
+% np = 4;
+% trainingA = zeros(training_size, (5 + nv));
+% trainingB = zeros(training_size, (5 + 4*np));
+% training1 = cell(training_size, 5);
+% 
+% f = waitbar(0, 'Simulating Data');
+% 
+% for i = 1:training_size
+%     
+%     
+%     deltaI = vars(1,1,i);
+%     deltaR = vars(2,1,i);
+%     temp_E_0 = 0.4473;
+%     temp_mstar = vars(4,1,i);
+%     temp_alpha = vars(5,1,i);
+%     
+%     delta = deltaR+sqrt(-1)*deltaI;
+%     temp_dispersion = [temp_E_0, temp_mstar, temp_alpha];
+%     
+%     %scale_factor = vars(3,1,i);
+%     
+%     vpCO_temp = hexagon_v2(a0);
+%     
+%     training1{i,1} = [deltaI, deltaR, temp_E_0, temp_mstar, temp_alpha];
+%     training1{i,2} = kspec(vpCO_temp, vspec, bias_sim, delta, temp_dispersion);
+% 
+%     [pks, locs, w, proms] = findpeaks(training1{i,2}, bias_sim, 'sortstr', 'descend', 'npeaks', np);
+%     
+%     testA = [locs', pks, locs', w', proms];
+%     
+%     testA = sortrows(testA);
+%     
+%     trainingA(i,:) = [deltaI deltaR temp_E_0 temp_mstar temp_alpha training1{i,2}'];
+%     trainingB(i,:) = [deltaI deltaR temp_E_0 temp_mstar temp_alpha testA(:,2)', testA(:,3)', testA(:,4)', testA(:,5)'];
+%     
+%     waitbar(i/training_size, f)
+%     
+% 
+% end
+% 
+% close(f)
+% 
+% %% 
+% csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071018_v10_E0fixed_specPoints.csv', trainingA);
+% csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData071018_v10_E0fixed_peakinfo.csv', trainingB);
 
+%% Simulating training data with spec points, and training data with peak info
+% Using random phases and dispersion values. 
+% Using a fixed E_0 and mstar 
+>>>>>>> 2d9994974f9bb822f615d69b7c53152c68e3fdc7
+
+% sf = 0.945;
+% dispersion2 = [0.439, 0.4068*(sf^2), -10.996*(sf^4)];
+% 
+% nv = 451;
+% bias_sim = linspace(-0.4, 0.5, nv);
+% 
+% vspec = [0,0];
+% abc = kconstants;
+% a0 = abc.a;
+% 
+% training_size = 12000;
+
+% rng('default'); 
+% vars = rand([5, 1, training_size]);
+% %delta I should be from 0 to 1 -- no change needed
+% %delta R should be between -pi/2 to 0
+% %E0 should be between __ and ___
+% %mstar should be between __ and __
+% % alpha should be between __ and __
+% vars(2,1,:) = (vars(2,1,:)-1)*pi/2;
+% vars(3,1,:) = vars(3,1,:)*0.1 + 0.401;
+% vars(4,1,:) = vars(4,1,:)*0.15 + 0.3;
+% vars(5,1,:) = vars(5,1,:)*10 - 15;
+% 
+% 
+% np = 4;
+% trainingA = zeros(training_size, (5 + nv));
+% trainingB = zeros(training_size, (5 + 4*np));
+% training1 = cell(training_size, 5);
+% 
+% f = waitbar(0, 'Simulating Data');
+% 
+% for i = 1:training_size
+%     
+%     
+%     deltaI = vars(1,1,i);
+%     deltaR = vars(2,1,i);
+%     temp_E_0 = 0.4473;
+%     temp_mstar = 0.3771;
+%     temp_alpha = vars(5,1,i);
+%     
+%     delta = deltaR+sqrt(-1)*deltaI;
+%     temp_dispersion = [temp_E_0, temp_mstar, temp_alpha];
+%     
+%     %scale_factor = vars(3,1,i);
+%     
+%     vpCO_temp = hexagon_v2(a0);
+%     
+%     training1{i,1} = [deltaI, deltaR, temp_E_0, temp_mstar, temp_alpha];
+%     training1{i,2} = kspec(vpCO_temp, vspec, bias_sim, delta, temp_dispersion);
+% 
+%     [pks, locs, w, proms] = findpeaks(training1{i,2}, bias_sim, 'sortstr', 'descend', 'npeaks', np);
+%     
+%     testA = [locs', pks, locs', w', proms];
+%     
+%     testA = sortrows(testA);
+%     
+%     trainingA(i,:) = [deltaI deltaR temp_E_0 temp_mstar temp_alpha training1{i,2}'];
+%     trainingB(i,:) = [deltaI deltaR temp_E_0 temp_mstar temp_alpha testA(:,2)', testA(:,3)', testA(:,4)', testA(:,5)'];
+%     
+%     waitbar(i/training_size, f)
+%     
+% 
+% end
+% 
+% close(f)
+% 
+% %% 
+% csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData070318_v11_E0Mfixed_specPoints.csv', trainingA);
+% csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData070318_v11_E0Mfixed_peakinfo.csv', trainingB);
+% 
+% 
+% %% Simulating training data with spec points, and training data with peak info
+% % Using random phases and dispersion values. 
+% % Using a fixed E_0, mstar and alpha
+% 
+% sf = 0.945;
+% dispersion2 = [0.439, 0.4068*(sf^2), -10.996*(sf^4)];
+% 
+% nv = 451;
+% bias_sim = linspace(-0.4, 0.5, nv);
+% 
+% vspec = [0,0];
+% abc = kconstants;
+% a0 = abc.a;
+% 
+% training_size = 12000;
+% 
+% rng('default'); 
+% vars = rand([5, 1, training_size]);
+% %delta I should be from 0 to 1 -- no change needed
+% %delta R should be between -pi/2 to 0
+% %E0 should be between __ and ___
+% %mstar should be between __ and __
+% % alpha should be between __ and __
+% vars(2,1,:) = (vars(2,1,:)-1)*pi/2;
+% vars(3,1,:) = vars(3,1,:)*0.1 + 0.401;
+% vars(4,1,:) = vars(4,1,:)*0.15 + 0.3;
+% vars(5,1,:) = vars(5,1,:)*10 - 15;
+% 
+% 
+% np = 4;
+% trainingA = zeros(training_size, (5 + nv));
+% trainingB = zeros(training_size, (5 + 4*np));
+% training1 = cell(training_size, 5);
+% 
+% f = waitbar(0, 'Simulating Data');
+% 
+% for i = 1:training_size
+%     
+%     
+%     deltaI = vars(1,1,i);
+%     deltaR = vars(2,1,i);
+%     temp_E_0 = 0.4473;
+%     temp_mstar = 0.3771;
+%     temp_alpha = -12.5968;
+%     
+%     delta = deltaR+sqrt(-1)*deltaI;
+%     temp_dispersion = [temp_E_0, temp_mstar, temp_alpha];
+%     
+%     %scale_factor = vars(3,1,i);
+%     
+%     vpCO_temp = hexagon_v2(a0);
+%     
+%     training1{i,1} = [deltaI, deltaR, temp_E_0, temp_mstar, temp_alpha];
+%     training1{i,2} = kspec(vpCO_temp, vspec, bias_sim, delta, temp_dispersion);
+% 
+%     [pks, locs, w, proms] = findpeaks(training1{i,2}, bias_sim, 'sortstr', 'descend', 'npeaks', np);
+%     
+%     testA = [locs', pks, locs', w', proms];
+%     
+%     testA = sortrows(testA);
+%     
+%     trainingA(i,:) = [deltaI deltaR temp_E_0 temp_mstar temp_alpha training1{i,2}'];
+%     trainingB(i,:) = [deltaI deltaR temp_E_0 temp_mstar temp_alpha testA(:,2)', testA(:,3)', testA(:,4)', testA(:,5)'];
+%     
+%     waitbar(i/training_size, f)
+%     
+% 
+% end
+% 
+% close(f)
+% 
+% %% 
+% csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData070318_v12_E0Mafixed_specPoints.csv', trainingA);
+% csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData070318_v12_E0Mafixed_peakinfo.csv', trainingB);
+% 
+% %% Simulating training data with spec points, and training data with peak info
+% % Using random phases and dispersion values. 
+% % Using a fixed E_0, mstar, alpha and deltaI
+% 
+% sf = 0.945;
+% dispersion2 = [0.439, 0.4068*(sf^2), -10.996*(sf^4)];
+% 
+% nv = 451;
+% bias_sim = linspace(-0.4, 0.5, nv);
+% 
+% vspec = [0,0];
+% abc = kconstants;
+% a0 = abc.a;
+% 
+% training_size = 12000;
+% 
+% rng('default'); 
+% vars = rand([5, 1, training_size]);
+% %delta I should be from 0 to 1 -- no change needed
+% %delta R should be between -pi/2 to 0
+% %E0 should be between __ and ___
+% %mstar should be between __ and __
+% % alpha should be between __ and __
+% vars(2,1,:) = (vars(2,1,:)-1)*pi/2;
+% vars(3,1,:) = vars(3,1,:)*0.1 + 0.401;
+% vars(4,1,:) = vars(4,1,:)*0.15 + 0.3;
+% vars(5,1,:) = vars(5,1,:)*10 - 15;
+% 
+% vars(2,1,:) = linspace(-pi/2, 0, training_size);
+% 
+% np = 4;
+% trainingA = zeros(training_size, (5 + nv));
+% trainingB = zeros(training_size, (5 + 4*np));
+% training1 = cell(training_size, 5);
+% 
+% f = waitbar(0, 'Simulating Data');
+% 
+% for i = 1:training_size
+%     
+%     
+%     deltaI = 0.2420;
+%     deltaR = vars(2,1,i);
+%     temp_E_0 = 0.4473;
+%     temp_mstar = 0.3771;
+%     temp_alpha = -12.5968;
+%     
+%     delta = deltaR+sqrt(-1)*deltaI;
+%     temp_dispersion = [temp_E_0, temp_mstar, temp_alpha];
+%     
+%     %scale_factor = vars(3,1,i);
+%     
+%     vpCO_temp = hexagon_v2(a0);
+%     
+%     training1{i,1} = [deltaI, deltaR, temp_E_0, temp_mstar, temp_alpha];
+%     training1{i,2} = kspec(vpCO_temp, vspec, bias_sim, delta, temp_dispersion);
+% 
+%     [pks, locs, w, proms] = findpeaks(training1{i,2}, bias_sim, 'sortstr', 'descend', 'npeaks', np);
+%     
+%     testA = [locs', pks, locs', w', proms];
+%     
+%     testA = sortrows(testA);
+%     
+%     trainingA(i,:) = [deltaI deltaR temp_E_0 temp_mstar temp_alpha training1{i,2}'];
+%     trainingB(i,:) = [deltaI deltaR temp_E_0 temp_mstar temp_alpha testA(:,2)', testA(:,3)', testA(:,4)', testA(:,5)'];
+%     
+%     waitbar(i/training_size, f)
+%     
+% 
+% end
+% 
+% close(f)
+% 
+% %% 
+% csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData070518_v13a_E0MaDifixed_specPoints.csv', trainingA);
+% csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonTrainingData070518_v13a_E0MaDifixed_peakinfo.csv', trainingB);
+% 
 
 
 %% Getting Experimental spec into same format
-
-
-fn1 = '/Users/lauracollins/Documents/Data/2016-08-01 Hexaxgonal Corral/';
-
+print('not yet') 
+fn1 ='2016-08-01 Hexaxgonal Corral/';
+print('yes')
 cd(fn1)
+
+%%
 
 dv5 = 5*10^-3;
 mpp = 0.1;
@@ -631,7 +844,7 @@ nv = 501;
 nv2 = 451;
 b1a = k3ds('GridSpec001.3ds');
 dV = 5*10^-3;
-b1=reshape(b1a.LIX,[100,nv]);
+b1=reshape(b1a.LIXf,[100,nv]);
 dataCu=mean(b1)'*10^9;
 
 %Ignoring spec2, since it has a different number of points
@@ -663,8 +876,8 @@ expSpec5 = [testA(:,2)', testA(:,3)', testA(:,4)', testA(:,5)'];
 
 expSpec2 = expSpec2';
 
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonExperimentalData062218_v8_specPoints.csv', expSpec2);
-csvwrite('/Users/lauracollins/Desktop/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonExperimentalData062218_v8_peakinfo.csv', expSpec5);
+csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonExperimentalData071018_v9_specPoints.csv', expSpec2);
+csvwrite('/Users/emory/Documents/GitHub/DS_ResearchProject_ND/Training_Data/Hexagon/HexagonExperimentalData071018_v9_peakinfo.csv', expSpec5);
 
 
 %% Simulating in a small window around average predicted phase
